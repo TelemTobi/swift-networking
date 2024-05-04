@@ -5,19 +5,20 @@ import PackageDescription
 
 let package = Package(
     name: "Flux",
+    platforms: [.iOS("16.0"), .macOS("13.0")],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "Flux",
-            targets: ["Flux"]),
+            targets: ["Flux"]
+        ),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "Flux"),
+            name: "Flux"
+        ),
         .testTarget(
             name: "FluxTests",
-            dependencies: ["Flux"]),
+            dependencies: ["Flux"]
+        ),
     ]
 )
