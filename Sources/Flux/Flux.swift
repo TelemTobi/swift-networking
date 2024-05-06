@@ -1,6 +1,8 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 
+import Foundation
+
 public enum Flux {
     
     /// An enum representing the different environments your API can be deployed to.
@@ -34,6 +36,6 @@ public enum Flux {
     /// A namespace containing configuration for stub requests.
     public enum Stub {
         /// Static property defining the delay (in seconds) for stub requests in the preview environment.
-        static var delay: Double = 2.0
+        static var delayInterval: TimeInterval = 2.0
     }
 }
