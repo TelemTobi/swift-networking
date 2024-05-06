@@ -1,11 +1,11 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 5.4
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "Flux",
-    platforms: [.iOS("16.0"), .macOS("13.0")],
+    platforms: [.iOS("13.0"), .macOS("10.15.0")],
     products: [
         .library(
             name: "Flux",
