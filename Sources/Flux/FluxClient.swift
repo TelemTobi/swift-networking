@@ -60,6 +60,19 @@ public struct FluxClient<E: Endpoint, F: DecodableError> {
         }
     }
     
+    /// Performs a network request using the provided `Endpoint` and a completion handler.
+    ///
+    /// - Parameters:
+    ///   - endpoint: The `Endpoint` object defining the API endpoint and request parameters.
+    ///   - completion: A closure that will be called asynchronously with the result of the network request. 
+    ///   The closure takes a single argument of type `Result<T, F>`.
+    ///   On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
+    public func request<T: Decodable>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
+        Task {
+            await completion(request(endpoint))
+        }
+    }
+    
     private func makeRequest<T: Decodable>(_ endpoint: Endpoint) async -> Result<T, F> {
         var urlRequest = URLRequest(endpoint)
         authenticator?.mapRequest(&urlRequest)
