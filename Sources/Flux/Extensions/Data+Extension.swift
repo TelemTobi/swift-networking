@@ -13,4 +13,12 @@ extension Data {
         
         return try jsonDecoder.decode(type, from: self)
     }
+    
+    var prettyPrintedJSON: String? {
+        guard let object = try? JSONSerialization.jsonObject(with: self),
+              let data = try? JSONSerialization.data(withJSONObject: object, options: .prettyPrinted)
+        else { return nil }
+        
+        return String(data: data, encoding: .utf8)
+    }
 }

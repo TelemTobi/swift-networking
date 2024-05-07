@@ -80,6 +80,10 @@ public struct FluxClient<E: Endpoint, F: DecodableError> {
         do {
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
             
+            if endpoint.shouldPrintLogs {
+                logRequest(endpoint, urlRequest, response, data)
+            }
+            
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, (200...299) ~= statusCode else {
                 return await handleError(endpoint, data)
             }
