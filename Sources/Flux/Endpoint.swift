@@ -47,6 +47,20 @@ public protocol Endpoint {
     ///
     /// This property allows you to provide pre-defined data to simulate a network response in tests.
     var sampleData: Data? { get }
+    
+    /// A Boolean value indicating whether request and response details should be printed to the console.
+    ///
+    /// When set to `true` (default), Flux will log the following information upon receiving a response:
+    ///  * Request URL
+    ///  * HTTP Method
+    ///  * Request Headers
+    ///  * Request Body (if applicable)
+    ///  * Status Code
+    ///  * Response Headers
+    ///  * Response Body (formatted JSON)
+    ///
+    /// You can use this property to control logging verbosity for specific endpoints.
+    var shouldPrintLogs: Bool { get }
 }
 
 // Default implementations for optional properties
@@ -59,4 +73,6 @@ extension Endpoint {
     var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy { .iso8601 }
 
     var sampleData: Data? { nil }
+    
+    var shouldPrintLogs: Bool { true }
 }
