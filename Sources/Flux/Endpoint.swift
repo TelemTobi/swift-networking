@@ -74,5 +74,5 @@ extension Endpoint {
 
     var sampleData: Data? { nil }
     
-    var shouldPrintLogs: Bool { true }
+    var shouldPrintLogs: Bool { false }
 }
