@@ -3,9 +3,7 @@ import Foundation
 public extension FluxClient {
     
     func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse, _ data: Data) {
-        let statusCode = (response as? HTTPURLResponse)?.statusCode
-        
-        if let statusCode, (200...299) ~= statusCode {
+        if response.status.group == .success {
             print("✨ Success - \(String(describing: endpoint))")
         } else {
             print("💔 Failure - \(String(describing: endpoint))")
@@ -13,7 +11,7 @@ public extension FluxClient {
         
         print("‣ \(request.url?.absoluteString ?? "Unknown URL")")
         print("‣ Http Method: \(request.httpMethod ?? "Unknown HTTPMethod")")
-        print("‣ Status Code: \(statusCode?.description ?? "Unknown Status Code")")
+        print("‣ Status Code: \(response.status.rawValue) (\(String(describing: response.status)))")
         print("‣ Request Headers: \(request.allHTTPHeaderFields ?? [:])")
         
         if let httpBody = request.httpBody?.prettyPrintedJSON {

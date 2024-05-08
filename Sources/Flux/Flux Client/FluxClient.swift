@@ -84,7 +84,7 @@ public struct FluxClient<E: Endpoint, F: DecodableError> {
                 logRequest(endpoint, urlRequest, response, data)
             }
             
-            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, (200...299) ~= statusCode else {
+            guard response.status.group == .success else {
                 return await handleError(endpoint, data)
             }
             
