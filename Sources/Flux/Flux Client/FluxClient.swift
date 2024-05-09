@@ -9,6 +9,9 @@ public struct FluxClient<E: Endpoint, F: DecodableError> {
     /// The current environment, either `.live`, `.test`, or `.preview`.
     public var environment: Flux.Environment = .live
     
+    
+    private let loggingQueue = DispatchQueue(label: #function)
+    
     /// A network client for making requests with features like authentication, environment handling, and error handling.
     ///
     /// - Parameters:
@@ -81,7 +84,9 @@ public struct FluxClient<E: Endpoint, F: DecodableError> {
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
             
             if endpoint.shouldPrintLogs {
-                logRequest(endpoint, urlRequest, response, data)
+               loggingQueue.async { [urlRequest] in
+                    logRequest(endpoint, urlRequest, response, data)
+                }
             }
             
             guard response.status.group == .success else {
