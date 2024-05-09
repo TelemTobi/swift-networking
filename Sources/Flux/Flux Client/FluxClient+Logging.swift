@@ -3,8 +3,10 @@ import Foundation
 public extension FluxClient {
     
     func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse, _ data: Data) {
+        print()
+        
         if response.status.group == .success {
-            print("✨ Success - \(String(describing: endpoint))")
+            print("✅ Success - \(String(describing: endpoint))")
         } else {
             print("💔 Failure - \(String(describing: endpoint))")
         }
@@ -21,7 +23,5 @@ public extension FluxClient {
         if let responseBody = data.prettyPrintedJSON {
             print("‣ Response: \n\(responseBody)")
         }
-        
-        print()
     }
 }

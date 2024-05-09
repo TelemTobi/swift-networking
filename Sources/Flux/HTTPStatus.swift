@@ -26,10 +26,6 @@ public enum HTTPStatus: Int, Error {
     
     case undefined = 0
     
-    //
-    // Informational - 1xx
-    //
-    
     /// - continue: The server has received the request headers and the client should proceed to send the request body.
     case `continue` = 100
     
@@ -38,10 +34,6 @@ public enum HTTPStatus: Int, Error {
     
     /// - processing: This code indicates that the server has received and is processing the request, but no response is available yet.
     case processing = 102
-    
-    //
-    // Success - 2xx
-    //
     
     /// - ok: Standard response for successful HTTP requests.
     case ok = 200
@@ -73,10 +65,6 @@ public enum HTTPStatus: Int, Error {
     /// - IMUsed: The server has fulfilled a request for the resource, and the response is a representation of the result of one or more instance-manipulations applied to the current instance.
     case IMUsed = 226
     
-    //
-    // Redirection - 3xx
-    //
-    
     /// - multipleChoices: Indicates multiple options for the resource from which the client may choose
     case multipleChoices = 300
     
@@ -103,12 +91,7 @@ public enum HTTPStatus: Int, Error {
     
     /// - permenantRedirect: The request and all future requests should be repeated using another URI.
     case permenantRedirect = 308
-    
-    //
-    // Client Error - 4xx
-    //
-    
-    
+
     /// - badRequest: The server cannot or will not process the request due to an apparent client error.
     case badRequest = 400
     
@@ -207,11 +190,7 @@ public enum HTTPStatus: Int, Error {
     
     /// - clientClosedRequest: Used when the client has closed the request before the server could send a response.
     case clientClosedRequest = 499
-    
-    //
-    // Server Error - 5xx
-    //
-    
+
     /// - internalServerError: A generic error message, given when an unexpected condition was encountered and no more specific message is suitable.
     case internalServerError = 500
     
