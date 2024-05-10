@@ -1,7 +1,7 @@
 import Foundation
 
-/// A network client for making requests with features like authentication, environment handling, and error handling.
-public struct FluxClient<E: Endpoint, F: DecodableError> {
+/// A network provider for making requests with features like authentication, environment handling, and error handling.
+public struct FluxProvider<E: Endpoint, F: DecodableError> {
     
     /// An optional authentication provider to be used with the requests.
     public var authenticator: Authenticator? = nil
@@ -12,14 +12,14 @@ public struct FluxClient<E: Endpoint, F: DecodableError> {
     
     private let loggingQueue = DispatchQueue(label: #function)
     
-    /// A network client for making requests with features like authentication, environment handling, and error handling.
+    /// A network provider for making requests with features like authentication, environment handling, and error handling.
     ///
     /// - Parameters:
     ///   - authenticator: An optional authentication provider to be used with the requests.
     ///   - environment: The current environment, either `.live`, `.test`, or `.preview`.
     ///
     /// * **Authentication:**
-    ///   * The client checks the authentication state through the `authenticator` (if provided).
+    ///   * The provider checks the authentication state through the `authenticator` (if provided).
     ///     If authentication is required and fails, a `.failure(.authenticationError)` result is returned.
     ///
     /// * **Environment:**

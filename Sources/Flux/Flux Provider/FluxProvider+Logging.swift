@@ -1,6 +1,6 @@
 import Foundation
 
-public extension FluxClient {
+public extension FluxProvider {
     
     func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse, _ data: Data) {
         print()
