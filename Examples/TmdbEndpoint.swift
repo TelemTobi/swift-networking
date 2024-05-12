@@ -37,8 +37,8 @@ extension TmdbEndpoint: Endpoint {
         case let .searchMovies(searchQuery):
             .withQueryParameters(["query": searchQuery])
             
-        case let .favorite(body):
-            .withBody(body)
+        case let .favorite(requestBody):
+            .withBody(requestBody)
         }
     }
     
@@ -48,6 +48,10 @@ extension TmdbEndpoint: Endpoint {
     
     var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy {
         .tmdbDateDecodingStrategy
+    }
+    
+    var keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy {
+        .convertToSnakeCase
     }
     
     var sampleData: Data? {
