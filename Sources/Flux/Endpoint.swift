@@ -40,8 +40,22 @@ public protocol Endpoint {
     ///
     /// This property allows you to specify how date strings are parsed into your model objects.
     /// 
-    /// (Default: `.iso8601`)
+    /// (Default: `.deferredToDate`)
     var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy { get }
+    
+    /// **The strategy used by `JSONEncoder` for encoding model properties as JSON keys.**
+    ///
+    /// This property allows you to customize how your model properties are mapped to JSON object keys during request body encoding.
+    ///
+    /// (Default: `.useDefaultKeys`)
+    var keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy { get }
+    
+    /// **The strategy used by `JSONEncoder` for encoding dates into the JSON request body.**
+    ///
+    /// This property allows you to specify how your `Date` properties are formatted and included in the request body.
+    ///
+    /// (Default: `.deferredToDate`)
+    var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy { get }
 
     /// Optional stub data used for testing purposes.
     ///
@@ -70,7 +84,11 @@ extension Endpoint {
 
     var keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy { .useDefaultKeys }
 
-    var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy { .iso8601 }
+    var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy { .deferredToDate }
+    
+    var keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy { .useDefaultKeys }
+    
+    var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy { .deferredToDate }
 
     var sampleData: Data? { nil }
     
