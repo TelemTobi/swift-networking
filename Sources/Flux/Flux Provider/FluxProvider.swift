@@ -77,7 +77,14 @@ public struct FluxProvider<E: Endpoint, F: DecodableError> {
     }
     
     private func makeRequest<T: Decodable>(_ endpoint: Endpoint) async -> Result<T, F> {
-        var urlRequest = URLRequest(endpoint)
+        var urlRequest: URLRequest
+        
+        do {
+            urlRequest = try URLRequest(endpoint)
+        } catch {
+            return .failure(.encodingError(error.localizedDescription))
+        }
+        
         authenticator?.mapRequest(&urlRequest)
      
         do {
@@ -102,7 +109,7 @@ public struct FluxProvider<E: Endpoint, F: DecodableError> {
                 return .success(model)
                 
             } catch {
-                return .failure(.decodingError)
+                return .failure(.decodingError(error.localizedDescription))
             }
             
         } catch {
@@ -124,7 +131,7 @@ public struct FluxProvider<E: Endpoint, F: DecodableError> {
             return .success(model)
             
         } catch {
-            return .failure(.decodingError)
+            return .failure(.decodingError(error.localizedDescription))
         }
     }
     
