@@ -123,7 +123,7 @@ Xcode 12.x or later
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/TelemTobi/Localite/blob/main/LICENSE.txt) file for more details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/TelemTobi/Flux/blob/main/LICENSE.txt) file for more details.
 
 Contributing
 
