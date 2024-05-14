@@ -3,7 +3,7 @@ import Foundation
 public extension URLRequest {
     
     /// Initializes a `URLRequest` from an `Endpoint` instance.
-    init(_ endpoint: Endpoint) {
+    init(_ endpoint: Endpoint) throws {
         let url = if endpoint.path.isEmpty {
             endpoint.baseURL
         } else {
@@ -22,13 +22,19 @@ public extension URLRequest {
             break
                 
         case let .withBody(encodable):
-            self.httpBody = try? JSONEncoder().encode(encodable)
+            let jsonEncoder = JSONEncoder()
+            jsonEncoder.keyEncodingStrategy = endpoint.keyEncodingStrategy
+            jsonEncoder.dateEncodingStrategy = endpoint.dateEncodingStrategy
+            self.httpBody = try jsonEncoder.encode(encodable)
                 
         case let .withQueryParameters(parameters):
             self.url?.append(queryParameters: parameters)
                 
         case let .withBodyAndQueryParameters(encodable, parameters):
-            self.httpBody = try? JSONEncoder().encode(encodable)
+            let jsonEncoder = JSONEncoder()
+            jsonEncoder.keyEncodingStrategy = endpoint.keyEncodingStrategy
+            jsonEncoder.dateEncodingStrategy = endpoint.dateEncodingStrategy
+            self.httpBody = try jsonEncoder.encode(encodable)
             self.url?.append(queryParameters: parameters)
         }
     }

@@ -27,7 +27,10 @@ public enum Flux {
         case authenticationError
 
         /// Indicates an error while decoding the response data.
-        case decodingError
+        case decodingError(String)
+        
+        /// Indicates an error while encoding the request body..
+        case encodingError(String)
 
         /// Indicates an unknown error.
         case unknownError
