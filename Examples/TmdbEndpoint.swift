@@ -55,6 +55,10 @@ extension TmdbEndpoint: Endpoint {
     }
     
     var sampleData: Data? {
-        nil // TODO
+        switch self {
+        case .movieGenres: Mock.movieGenres.dataEncoded
+        case .searchMovies: Mock.searchMovies.dataEncoded
+        case .favorite: nil
+        }
     }
 }
