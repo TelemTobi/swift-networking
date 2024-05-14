@@ -125,7 +125,7 @@ Xcode 12.x or later
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/TelemTobi/Flux/blob/main/LICENSE.txt) file for more details.
 
-Contributing
+## Contributing
 
 We welcome contributions to Flux! Feel free to open issues or pull requests to improve the library. Please follow these guidelines:
 
