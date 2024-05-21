@@ -11,8 +11,3 @@ struct TestEndpoint: Endpoint {
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy
     var sampleData: Data?
 }
-
-struct TestBody: Encodable {
-    let someDate: Date
-    let someCondition: Bool
-}
