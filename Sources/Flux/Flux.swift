@@ -33,7 +33,7 @@ public enum Flux {
         case encodingError(String)
 
         /// Indicates an unknown error.
-        case unknownError
+        case unknownError(String?)
     }
     
     /// A namespace containing configuration for stub requests.
