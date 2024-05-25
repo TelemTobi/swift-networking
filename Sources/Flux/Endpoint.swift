@@ -78,7 +78,7 @@ public protocol Endpoint {
 }
 
 // Default implementations for optional properties
-extension Endpoint {
+public extension Endpoint {
 
     var headers: [String: String]? { nil }
 
