@@ -1,7 +1,7 @@
 import Foundation
 @testable import Flux
 
-struct TestError: DecodableError {
+struct TestError: DecodableError, Equatable {
     
     var debugDescription: String
     
