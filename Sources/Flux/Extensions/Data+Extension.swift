@@ -11,6 +11,10 @@ extension Data {
         return try jsonDecoder.decode(type, from: self)
     }
     
+    func parseJSON() throws -> [String: AnyHashable]? {
+        try JSONSerialization.jsonObject(with: self, options: []) as? [String: AnyHashable]
+    }
+    
     var prettyPrintedJSON: String? {
         guard let object = try? JSONSerialization.jsonObject(with: self),
               let data = try? JSONSerialization.data(withJSONObject: object, options: .prettyPrinted)

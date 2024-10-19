@@ -7,7 +7,7 @@ public extension URLRequest {
         let url = if endpoint.path.isEmpty {
             endpoint.baseURL
         } else {
-            endpoint.baseURL.appendingPathComponent(endpoint.path)
+            endpoint.baseURL.appendingPathComponent(endpoint.path.ensurePrefix("/"))
         }
         
         self.init(url: url)

@@ -9,7 +9,10 @@ public protocol DecodableError: Error, Decodable {
 public extension DecodableError {
     static var connectionError: Self { .init(.connectionError) }
     static var authenticationError: Self { .init(.authenticationError) }
-    static var unknownError: Self { .init(.unknownError) }
+    
+    static func unknownError(_ message: String? = nil) -> Self {
+        .init(.unknownError(message))
+    }
 
     static func decodingError(_ message: String) -> Self {
         .init(.decodingError(message))

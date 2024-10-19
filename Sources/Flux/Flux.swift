@@ -33,7 +33,20 @@ public enum Flux {
         case encodingError(String)
 
         /// Indicates an unknown error.
-        case unknownError
+        case unknownError(String?)
+        
+        var debugDescription: String {
+            switch self {
+            case .connectionError, .authenticationError:
+                String(describing: self)
+                
+            case let .decodingError(message), let .encodingError(message):
+                message
+                
+            case let .unknownError(message):
+                message ?? String(describing: self)
+            }
+        }
     }
     
     /// A namespace containing configuration for stub requests.

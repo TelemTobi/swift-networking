@@ -113,7 +113,7 @@ public struct FluxProvider<E: Endpoint, F: DecodableError> {
             }
             
         } catch {
-            return .failure(.unknownError)
+            return .failure(.unknownError(error.localizedDescription))
         }
     }
     
@@ -143,7 +143,7 @@ public struct FluxProvider<E: Endpoint, F: DecodableError> {
         ) {
             return .failure(error)
         } else {
-            return .failure(.unknownError)
+            return .failure(.unknownError())
         }
     }
 }
