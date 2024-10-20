@@ -88,7 +88,7 @@ try await URLSession.shared.data(for: urlRequest)
 Flux also offers a convenient FluxProvider class that handles common network tasks for you. The FluxProvider takes care of authentication, environment handling, and error management.
 
 ```swift
-let provider = FluxClient<MyAPI, MyError>()
+let provider = FluxProvider<MyAPI, MyError>()
 
 // Make a network request with async/await
 Task {
@@ -102,7 +102,7 @@ Task {
 }
 
 // Make a network request with completion handler
-client.request(.getUser(userId: "123")) { result in
+provider.request(.getUser(userId: "123")) { result in
     switch result {
     case .success(let user):
         // Handle success
@@ -112,7 +112,7 @@ client.request(.getUser(userId: "123")) { result in
 }
 ```
 
-**Remember: Using FluxClient is entirely optional. You can still construct your own URLRequest using the Endpoint enum if you prefer more control over the network layer.**
+**Remember: Using FluxProvider is entirely optional. You can still construct your own URLRequest using the Endpoint enum if you prefer more control over the network layer.**
 
 
 ## Requirements
