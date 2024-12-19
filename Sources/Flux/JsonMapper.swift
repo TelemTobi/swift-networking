@@ -22,9 +22,9 @@ public protocol JsonMapper {
     /// - Parameter data: The raw JSON data received from the API.
     /// - Returns: The processed data, ready for further use.
     /// - Throws: `Networking.Error.mappingError` if the transformation or validation fails.
-    static func map(_ data: Data) throws(Networking.Error) -> Data
+    static func map(_ data: Data) throws(Flux.Error) -> Data
 }
 
 public extension JsonMapper {
-    static func map(_ data: Data) throws(Networking.Error) -> Data { data }
+    static func map(_ data: Data) throws(Flux.Error) -> Data { data }
 }

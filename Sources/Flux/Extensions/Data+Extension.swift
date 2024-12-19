@@ -2,7 +2,7 @@ import Foundation
 
 extension Data {
     
-    func parse<T: Decodable>(type: T.Type, using dateDecodingStrategy: JSONDecoder.DateDecodingStrategy = .deferredToDate, _ keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy = .useDefaultKeys) throws -> T {
+    func decode<T: Decodable>(into type: T.Type, using dateDecodingStrategy: JSONDecoder.DateDecodingStrategy = .deferredToDate, _ keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy = .useDefaultKeys) throws -> T {
         
         let jsonDecoder = JSONDecoder()
         jsonDecoder.keyDecodingStrategy = keyDecodingStrategy
@@ -11,11 +11,11 @@ extension Data {
         return try jsonDecoder.decode(type, from: self)
     }
     
-    func parseJSON() throws -> [String: AnyHashable]? {
+    func decodeJson() throws -> [String: AnyHashable]? {
         try JSONSerialization.jsonObject(with: self, options: []) as? [String: AnyHashable]
     }
     
-    var prettyPrintedJSON: String? {
+    var prettyPrintedJson: String? {
         guard let object = try? JSONSerialization.jsonObject(with: self),
               let data = try? JSONSerialization.data(withJSONObject: object, options: .prettyPrinted)
         else { return nil }

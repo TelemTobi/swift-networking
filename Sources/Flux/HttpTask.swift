@@ -1,7 +1,7 @@
 import Foundation
 
 /// Defines the configuration for a network request, including data and parameters.
-public enum HTTPTask {
+public enum HttpTask {
 
     /// A request with no additional data in the body or query parameters.
     case empty

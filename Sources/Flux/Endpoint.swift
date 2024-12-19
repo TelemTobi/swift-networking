@@ -1,5 +1,7 @@
 import Foundation
 
+import Foundation
+
 /// Defines the specifications required to construct a `URLRequest`.
 public protocol Endpoint {
 
@@ -16,12 +18,12 @@ public protocol Endpoint {
     /// The HTTP method for the network request.
     ///
     /// This value specifies the type of operation you want to perform (e.g., GET, POST, PUT).
-    var method: HTTPMethod { get }
+    var method: HttpMethod { get }
 
     /// The configuration for the HTTP request body and query parameters.
     ///
     /// This specifies how the request data should be encoded and included in the request.
-    var task: HTTPTask { get }
+    var task: HttpTask { get }
 
     /// The headers to be included in the network request.
     ///
@@ -39,7 +41,7 @@ public protocol Endpoint {
     /// The strategy used by `JSONDecoder` for decoding dates from the JSON response.
     ///
     /// This property allows you to specify how date strings are parsed into your model objects.
-    /// 
+    ///
     /// (Default: `.deferredToDate`)
     var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy { get }
     
@@ -57,14 +59,20 @@ public protocol Endpoint {
     /// (Default: `.deferredToDate`)
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy { get }
 
-    /// Optional stub data used for testing purposes.
+    #if DEBUG
+    /// A Boolean value that indicates whether the endpoint should use sample data instead of making a real network request.
+    ///
+    /// When set to `true`, the `sampleData` property will be used to simulate the network response, allowing you to test the endpoint without relying on an actual network connection.
+    var shouldUseSampleData: Bool { get }
+    
+    /// Optional sample data used for testing or mocking purposes.
     ///
     /// This property allows you to provide pre-defined data to simulate a network response in tests.
     var sampleData: Data? { get }
     
     /// A Boolean value indicating whether request and response details should be printed to the console.
     ///
-    /// When set to `true` (default), Flux will log the following information upon receiving a response:
+    /// When set to `true`, The following information will be logged upon receiving a response:
     ///  * Request URL
     ///  * HTTP Method
     ///  * Request Headers
@@ -74,7 +82,10 @@ public protocol Endpoint {
     ///  * Response Body (formatted JSON)
     ///
     /// You can use this property to control logging verbosity for specific endpoints.
+    ///
+    /// (Default: `true`)
     var shouldPrintLogs: Bool { get }
+    #endif
 }
 
 // Default implementations for optional properties
@@ -90,7 +101,11 @@ public extension Endpoint {
     
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy { .deferredToDate }
 
+    #if DEBUG
+    var shouldUseSampleData: Bool { false }
+    
     var sampleData: Data? { nil }
     
-    var shouldPrintLogs: Bool { false }
+    var shouldPrintLogs: Bool { true }
+    #endif
 }

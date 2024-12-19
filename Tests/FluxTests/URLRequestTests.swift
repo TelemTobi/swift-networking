@@ -58,7 +58,7 @@ final class URLRequestTests: XCTestCase {
         urlRequest = try URLRequest(testEndpoint)
         
         XCTAssertEqual(
-            try urlRequest.httpBody?.parseJSON(),
+            try urlRequest.httpBody?.decodeJson(),
             ["some_date": testBody.someDate.ISO8601Format(), "some_condition": false]
         )
         
@@ -82,7 +82,7 @@ final class URLRequestTests: XCTestCase {
         urlRequest = try URLRequest(testEndpoint)
         
         XCTAssertEqual(
-            try urlRequest.httpBody?.parseJSON(),
+            try urlRequest.httpBody?.decodeJson(),
             ["some_date": testBody.someDate.ISO8601Format(), "some_condition": false]
         )
         
