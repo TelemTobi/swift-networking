@@ -1,18 +1,15 @@
 import Foundation
 
-/// A network provider for making requests with features like authentication, environment handling, and error handling.
-public struct FluxProvider<E: Endpoint, F: DecodableError> {
-    
-    /// An optional authentication provider to be used with the requests.
-    public var authenticator: Authenticator? = nil
+/// A network controller for making requests with features like authentication, environment handling, and error handling.
+public class FluxController<E: Endpoint, F: DecodableError> {
     
     /// The current environment, either `.live`, `.test`, or `.preview`.
     public var environment: Flux.Environment = .live
     
+    /// An optional authentication provider to be used with the requests.
+    public var authenticator: Authenticator? = nil
     
-    private let loggingQueue = DispatchQueue(label: #function)
-    
-    /// A network provider for making requests with features like authentication, environment handling, and error handling.
+    /// A network controller for making requests with features like authentication, environment handling, and error handling.
     ///
     /// - Parameters:
     ///   - authenticator: An optional authentication provider to be used with the requests.
@@ -26,9 +23,9 @@ public struct FluxProvider<E: Endpoint, F: DecodableError> {
     ///   * **.live:** Makes a real network call to the production API endpoint.
     ///   * **.test:** Does not make a network call. This environment is intended for unit testing your code that interacts with the API.
     ///   * **.preview:** Does not make a network call. This environment is used with SwiftUI previews to provide sample data without actual network requests.
-    public init(authenticator: Authenticator? = nil, environment: Flux.Environment = .live) {
-        self.authenticator = authenticator
+    public init(environment: Flux.Environment = .live, authenticator: Authenticator? = nil) {
         self.environment = environment
+        self.authenticator = authenticator
     }
     
     /// Performs a network request using the provided `Endpoint`.
@@ -91,9 +88,7 @@ public struct FluxProvider<E: Endpoint, F: DecodableError> {
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
             
             if endpoint.shouldPrintLogs {
-               loggingQueue.async { [urlRequest] in
-                    logRequest(endpoint, urlRequest, response, data)
-                }
+                logRequest(endpoint, urlRequest, response, data)
             }
             
             guard response.status.group == .success else {
