@@ -1,7 +1,7 @@
 import Foundation
 
-/// A network provider for making requests with features like authentication, environment handling, and error handling.
-public struct FluxProvider<E: Endpoint, F: DecodableError> {
+/// A network controller for making requests with features like authentication, environment handling, and error handling.
+public struct FluxController<E: Endpoint, F: DecodableError> {
     
     /// An optional authentication provider to be used with the requests.
     public var authenticator: Authenticator? = nil
@@ -12,7 +12,7 @@ public struct FluxProvider<E: Endpoint, F: DecodableError> {
     
     private let loggingQueue = DispatchQueue(label: #function)
     
-    /// A network provider for making requests with features like authentication, environment handling, and error handling.
+    /// A network controller for making requests with features like authentication, environment handling, and error handling.
     ///
     /// - Parameters:
     ///   - authenticator: An optional authentication provider to be used with the requests.

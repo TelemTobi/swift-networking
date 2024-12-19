@@ -1,7 +1,7 @@
 import XCTest
 @testable import Flux
 
-final class FluxProviderTests: XCTestCase {
+final class FluxControllerTests: XCTestCase {
     
     var testEndpoint = TestEndpoint(
         baseURL: URL(string: "https://someMadeUpUrl.co.il")!,
@@ -20,7 +20,7 @@ final class FluxProviderTests: XCTestCase {
     )
     
     func testAuthentication() async {
-        var provider = FluxProvider<TestEndpoint, TestError>(
+        var controller = FluxController<TestEndpoint, TestError>(
             authenticator: testAuthenticator,
             environment: .live
         )
@@ -28,20 +28,20 @@ final class FluxProviderTests: XCTestCase {
         var result: Result<TestResponse, TestError>
         
         // Connection error
-        result = await provider.request(testEndpoint)
+        result = await controller.request(testEndpoint)
         XCTAssertEqual(result, .failure(.connectionError))
         
         // Authentication error
         testAuthenticator.state = .notLoggedIn
-        provider.authenticator = testAuthenticator
+        controller.authenticator = testAuthenticator
         
-        result = await provider.request(testEndpoint)
+        result = await controller.request(testEndpoint)
         XCTAssertEqual(result, .failure(.authenticationError))
         
         testAuthenticator.state = .reachable
-        provider.authenticator = testAuthenticator
+        controller.authenticator = testAuthenticator
         
-        result = await provider.request(testEndpoint)
+        result = await controller.request(testEndpoint)
         XCTAssertEqual(result, .failure(.authenticationError))
     }
     
