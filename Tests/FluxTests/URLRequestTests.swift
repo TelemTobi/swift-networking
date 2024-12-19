@@ -10,7 +10,8 @@ final class URLRequestTests: XCTestCase {
         task: .empty,
         headers: [:],
         keyEncodingStrategy: .convertToSnakeCase,
-        dateEncodingStrategy: .iso8601
+        dateEncodingStrategy: .iso8601,
+        dateDecodingStrategy: .iso8601
     )
     
     func testEndpointURL() throws {

@@ -7,10 +7,7 @@ let package = Package(
     name: "Flux",
     platforms: [.iOS("13.0"), .macOS("10.15.0")],
     products: [
-        .library(
-            name: "Flux",
-            targets: ["Flux"]
-        ),
+        .library(name: "Flux", targets: ["Flux"]),
     ],
     targets: [
         .target(
@@ -18,7 +15,8 @@ let package = Package(
         ),
         .testTarget(
             name: "FluxTests",
-            dependencies: ["Flux"]
+            dependencies: ["Flux"],
+            resources: [.process("Resources")]
         )
     ]
 )
