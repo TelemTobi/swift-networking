@@ -24,7 +24,3 @@ public protocol JsonMapper {
     /// - Throws: `Networking.Error.mappingError` if the transformation or validation fails.
     static func map(_ data: Data) throws(Flux.Error) -> Data
 }
-
-public extension JsonMapper {
-    static func map(_ data: Data) throws(Flux.Error) -> Data { data }
-}

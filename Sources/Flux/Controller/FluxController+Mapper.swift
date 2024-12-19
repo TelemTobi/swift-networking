@@ -14,8 +14,16 @@ extension FluxController {
     
     /// Performs a network request using the provided `Endpoint`.
     ///
+    /// This method fetches data from the specified endpoint, processes it using a `JsonMapper` (if implemented),
+    /// and then decodes the transformed data into the specified model type.
+    ///
+    /// ### JSON Mapping
+    /// If the response data requires additional processing (e.g., validation or transformation),
+    /// the model type must conform to both `Decodable` and `JsonMapper`.
+    /// The static `map(_:)` method of the `JsonMapper` protocol is called before decoding.
+    ///
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
-    /// - Throws: An error of type `F` if the request fails due to an issue like authentication, connection, or decoding errors.
+    /// - Throws: An error of type `F` if the request fails due to issues like authentication, connection, or decoding errors.
     /// - Returns: The decoded response model of type `T`.
     public func request<T: DecodableJson>(_ endpoint: E) async throws(F) -> T {
         #if DEBUG
@@ -46,9 +54,17 @@ extension FluxController {
     
     /// Performs a network request using the provided `Endpoint`.
     ///
+    /// This method fetches data from the specified endpoint, processes it using a `JsonMapper` (if implemented),
+    /// and then decodes the transformed data into the specified model type. The result is returned as an asynchronous
+    /// `Result` containing the decoded model or an error.
+    ///
+    /// ### JSON Mapping
+    /// If the response data requires additional processing, the `JsonMapper.map(_:)` method is called
+    /// before decoding into the target type.
+    ///
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
-    /// - Returns: An asynchronous result of type `Result<T, F>`.
-    ///     On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
+    /// - Returns: An asynchronous `Result<T, F>`. On success, it contains the decoded model of type `T`.
+    ///   On failure, it contains an error of type `F` describing the issue.
     public func request<T: DecodableJson>(_ endpoint: E) async -> Result<T, F> {
         do {
             let result: T = try await request(endpoint)
@@ -60,11 +76,19 @@ extension FluxController {
     
     /// Performs a network request using the provided `Endpoint` and calls a completion handler with the result.
     ///
+    /// This method fetches data from the specified endpoint, processes it using a `JsonMapper` (if implemented),
+    /// and then decodes the transformed data into the specified model type. The completion handler is invoked
+    /// with the result.
+    ///
+    /// ### JSON Mapping
+    /// If the response data requires additional processing, the `JsonMapper.map(_:)` method is called
+    /// before decoding into the target type.
+    ///
     /// - Parameters:
     ///   - endpoint: The `Endpoint` object defining the API endpoint and request parameters.
-    ///   - completion: A closure that will be called asynchronously with the result of the network request.
-    ///   The closure takes a single argument of type `Result<T, F>`.
-    ///   On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
+    ///   - completion: A closure that is called asynchronously with the result of the network request.
+    ///     The closure takes a single argument of type `Result<T, F>`.
+    ///     On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F`.
     public func request<T: DecodableJson>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
         Task {
             do {
