@@ -102,7 +102,7 @@ Task {
 }
 
 // Make a network request with completion handler
-client.request(.getUser(userId: "123")) { result in
+provider.request(.getUser(userId: "123")) { result in
     switch result {
     case .success(let user):
         // Handle success
@@ -112,7 +112,7 @@ client.request(.getUser(userId: "123")) { result in
 }
 ```
 
-**Remember: Using FluxClient is entirely optional. You can still construct your own URLRequest using the Endpoint enum if you prefer more control over the network layer.**
+**Remember: Using FluxProvider is entirely optional. You can still construct your own URLRequest using the Endpoint enum if you prefer more control over the network layer.**
 
 
 ## Requirements
