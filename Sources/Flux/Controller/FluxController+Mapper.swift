@@ -1,10 +1,3 @@
-//
-//  FluxController+Mapping.swift
-//  Flux
-//
-//  Created by Telem Tobi on 19/12/2024.
-//
-
 import Foundation
 
 extension FluxController {

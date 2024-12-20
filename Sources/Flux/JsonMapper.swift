@@ -1,10 +1,3 @@
-//
-//  JsonMapper.swift
-//  Flux
-//
-//  Created by Telem Tobi on 19/12/2024.
-//
-
 import Foundation
 
 /// A protocol that defines a mechanism for processing and transforming JSON response data from an API.
