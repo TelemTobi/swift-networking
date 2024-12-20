@@ -4,8 +4,8 @@ import Foundation
 struct TestEndpoint: Endpoint {
     var baseURL: URL
     var path: String
-    var method: HTTPMethod
-    var task: HTTPTask
+    var method: HttpMethod
+    var task: HttpTask
     var headers: [String: String]?
     var keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy

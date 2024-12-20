@@ -1,6 +1,6 @@
 import Foundation
 
-public enum HTTPStatus: Int, Error {
+public enum HttpStatus: Int, Error {
     
     /// The response class representation of status codes, these get grouped by their first digit.
     public enum Group {

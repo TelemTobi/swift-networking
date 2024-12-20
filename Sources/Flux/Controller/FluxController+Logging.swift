@@ -11,16 +11,16 @@ public extension FluxController {
             print("💔 Failure - \(String(describing: endpoint))")
         }
         
-        print("‣ \(request.url?.absoluteString ?? "Unknown URL")")
+        print(request.url?.absoluteString ?? "Unknown URL")
         print("‣ Http Method: \(request.httpMethod ?? "Unknown HTTPMethod")")
         print("‣ Status Code: \(response.status.rawValue) (\(String(describing: response.status)))")
         print("‣ Request Headers: \(request.allHTTPHeaderFields ?? [:])")
         
-        if let httpBody = request.httpBody?.prettyPrintedJSON {
+        if let httpBody = request.httpBody?.prettyPrintedJson {
             print("‣ Request Body: \n\(httpBody)")
         }
         
-        if let responseBody = data.prettyPrintedJSON {
+        if let responseBody = data.prettyPrintedJson {
             print("‣ Response: \n\(responseBody)")
         }
     }

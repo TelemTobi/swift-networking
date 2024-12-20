@@ -2,8 +2,8 @@ import Foundation
 
 public extension URLResponse {
     
-    var status: HTTPStatus {
+    var status: HttpStatus {
         let statusCode = (self as? HTTPURLResponse)?.statusCode ?? .zero
-        return HTTPStatus(rawValue: statusCode) ?? .undefined
+        return HttpStatus(rawValue: statusCode) ?? .undefined
     }
 }
