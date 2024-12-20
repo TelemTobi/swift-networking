@@ -9,5 +9,6 @@ struct TestEndpoint: Endpoint {
     var headers: [String: String]?
     var keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy
+    var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
     var sampleData: Data?
 }
