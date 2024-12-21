@@ -1,6 +1,6 @@
 import Foundation
 
-extension Data {
+public extension Data {
     
     func decode<T: Decodable>(into type: T.Type, using dateDecodingStrategy: JSONDecoder.DateDecodingStrategy = .deferredToDate, _ keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy = .useDefaultKeys) throws -> T {
         
