@@ -11,7 +11,9 @@ public class FluxController<E: Endpoint, F: DecodableError> {
     
     internal let urlSession: URLSession
     
+    #if DEBUG
     internal let loggingQueue = DispatchQueue(label: #function)
+    #endif
     
     /// A networking controller for making requests with features like authentication, environment handling, and error handling.
     ///
