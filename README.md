@@ -9,6 +9,7 @@ Focus on building awesome features, and let Flux handle the network communicatio
 - [x] **Organized API Calls:** Define your API endpoints in a single, well-structured Endpoint enum. Keep your code clean and maintainable by focusing on the logic of your application, not URL construction.
 - [x] **Environment Handling:** Seamlessly switch between live, test, and preview environments. Make realistic test data with ease in the test environment, and provide sample data for SwiftUI previews without actual network calls.
 - [x] **Authentication (Optional):** Integrate your authentication provider with Flux for a smooth user experience. Flux handles authentication checks and errors for you.
+- [x] **JSON Mapping (Optional):** Process, validate, or transform incoming JSON data before decoding using JsonMapper. Ideal for cases where the raw response needs adjustments.
 - [x] **Error Handling:** Flux gracefully handles network errors and provides informative error messages. Spend less time debugging network issues and more time building!
 - [x] **Logging Control:** Control logging verbosity for specific endpoints with the shouldPrintLogs parameter.
 
@@ -52,14 +53,14 @@ extension MyAPI: Endpoint {
     }
   }
   
-  var method: HTTPMethod {
+  var method: HttpMethod {
     switch self {
     case .getUser: .get
     case .updateProfile: .put
     }
   }
   
-  var task: HTTPTask {
+  var task: HttpTask {
     switch self {
     case .getUser:
       .empty
@@ -68,6 +69,7 @@ extension MyAPI: Endpoint {
       .withBody(["name": name, "email": email]) // Alternatively, an encodable object can be provided
     }
   }
+}
   
   // You can set other optional properties here if needed
 ```
@@ -91,28 +93,24 @@ Flux also offers a convenient FluxController class that handles common network t
 let controller = FluxController<MyAPI, MyError>()
 
 // Make a network request with async/await
-Task {
-    let result = await controller.request(.getUser(userId: "123"))
-    switch result {
-    case .success(let user):
-        // Handle success
-    case .failure(let error):
-        // Handle error
-    }
+do {
+    let result = try await controller.request(.getUser(userId: "123"))
+} catch {
+    // Handle `MyError`
 }
 
 // Make a network request with completion handler
-provider.request(.getUser(userId: "123")) { result in
+controller.request(.getUser(userId: "123")) { result in
     switch result {
-    case .success(let user):
+    case let .success(user):
         // Handle success
-    case .failure(let error):
+    case let .failure(error):
         // Handle error
     }
 }
 ```
 
-**Remember: Using FluxProvider is entirely optional. You can still construct your own URLRequest using the Endpoint enum if you prefer more control over the network layer.**
+**Remember: Using FluxController is entirely optional. You can still construct your own URLRequest using the Endpoint enum if you prefer more control over the network layer.**
 
 
 ## Requirements
