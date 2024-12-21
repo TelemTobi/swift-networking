@@ -9,7 +9,9 @@ public class FluxController<E: Endpoint, F: DecodableError> {
     /// An optional authentication provider to be used with the requests.
     public var authenticator: Authenticator? = nil
     
-    let urlSession: URLSession
+    internal let urlSession: URLSession
+    
+    internal let loggingQueue = DispatchQueue(label: #function)
     
     /// A networking controller for making requests with features like authentication, environment handling, and error handling.
     ///
