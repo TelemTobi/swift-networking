@@ -10,5 +10,8 @@ struct TestEndpoint: Endpoint {
     var keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy
     var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
+    
+    #if DEBUG
     var sampleData: Data?
+    #endif
 }

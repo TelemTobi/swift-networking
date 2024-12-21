@@ -2,13 +2,17 @@ import Foundation
 
 public extension FluxController {
     
+    #if DEBUG
     func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse, _ data: Data) {
+        let endpointName = String(describing: endpoint)
+            .components(separatedBy: "(").first ?? String(describing: endpoint)
+        
         print()
         
         if response.status.group == .success {
-            print("✅ Success - \(String(describing: endpoint))")
+            print("✅ Success - \(String(describing: endpointName))")
         } else {
-            print("💔 Failure - \(String(describing: endpoint))")
+            print("💔 Failure - \(String(describing: endpointName))")
         }
         
         print(request.url?.absoluteString ?? "Unknown URL")
@@ -24,4 +28,5 @@ public extension FluxController {
             print("‣ Response: \n\(responseBody)")
         }
     }
+    #endif
 }
