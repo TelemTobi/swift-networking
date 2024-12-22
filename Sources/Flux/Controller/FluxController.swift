@@ -9,7 +9,11 @@ public class FluxController<E: Endpoint, F: DecodableError> {
     /// An optional authentication provider to be used with the requests.
     public var authenticator: Authenticator? = nil
     
-    let urlSession: URLSession
+    internal let urlSession: URLSession
+    
+    #if DEBUG
+    internal let loggingQueue = DispatchQueue(label: #function)
+    #endif
     
     /// A networking controller for making requests with features like authentication, environment handling, and error handling.
     ///
@@ -145,7 +149,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
     private func makeMockRequest<T: Decodable>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             if environment == .preview {
-                try await Task.sleep(interval: Flux.Stub.delayInterval)
+                try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
             }
             
             let model = try (endpoint.sampleData ?? Data()).decode(

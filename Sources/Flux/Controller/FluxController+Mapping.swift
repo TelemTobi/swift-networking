@@ -1,8 +1,6 @@
 import Foundation
 
 extension FluxController {
-    // MARK: Json mapping API
-    
     /// Performs a network request using the provided `Endpoint`.
     ///
     /// This method fetches data from the specified endpoint, processes it using a `JsonMapper` (if implemented),
@@ -127,7 +125,7 @@ extension FluxController {
     private func makeMockRequest<T: Decodable & JsonMapper>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             if environment == .preview {
-                try await Task.sleep(interval: Flux.Stub.delayInterval)
+                try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
             }
             
             let model = try T
