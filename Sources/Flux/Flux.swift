@@ -36,22 +36,16 @@ public enum Flux {
         case unknownError(String?)
         
         public var debugDescription: String {
-            switch self {
-            case .connectionError, .authenticationError:
-                String(describing: self)
-                
-            case let .decodingError(message), let .encodingError(message):
-                message
-                
-            case let .unknownError(message):
-                message ?? String(describing: self)
-            }
+            String(describing: self)
         }
     }
     
-    /// A namespace containing configuration for stub requests.
-    public enum Stub {
+    /// A namespace containing configuration for debug requests.
+    public enum DebugConfiguration {
         /// Static property defining the delay (in seconds) for stub requests in the preview environment.
         static var delayInterval: TimeInterval = 2.0
+        
+        /// The global default value for the Endpoint's `shouldPrintLogs`.
+        static var shouldPrintLogs: Bool = true
     }
 }

@@ -149,7 +149,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
     private func makeMockRequest<T: Decodable>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             if environment == .preview {
-                try await Task.sleep(interval: Flux.Stub.delayInterval)
+                try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
             }
             
             let model = try (endpoint.sampleData ?? Data()).decode(
