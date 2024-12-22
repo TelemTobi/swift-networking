@@ -1,8 +1,8 @@
 import Foundation
 
-extension URL {
+public extension URL {
     
-    public mutating func append(queryParameters: [String: Any]) {
+    mutating func append(queryParameters: [String: Any]) {
         var urlComponents = URLComponents(string: self.absoluteString)
         
         urlComponents?.queryItems = queryParameters.map {
