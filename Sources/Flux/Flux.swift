@@ -43,7 +43,7 @@ public enum Flux {
     /// A namespace containing configuration for debug requests.
     public enum DebugConfiguration {
         /// Static property defining the delay (in seconds) for stub requests in the preview environment.
-        static var delayInterval: TimeInterval = 2.0
+        static var delayInterval: TimeInterval = 1.0
         
         /// The global default value for the Endpoint's `shouldPrintLogs`.
         static var shouldPrintLogs: Bool = true

@@ -8,7 +8,11 @@ public extension Data {
         jsonDecoder.keyDecodingStrategy = keyDecodingStrategy
         jsonDecoder.dateDecodingStrategy = dateDecodingStrategy
         
-        return try jsonDecoder.decode(type, from: self)
+        do {
+            return try jsonDecoder.decode(type, from: self)
+        } catch {
+            throw Flux.Error.decodingError("\(error)")
+        }
     }
     
     func decodeJson() throws -> [String: AnyHashable]? {
