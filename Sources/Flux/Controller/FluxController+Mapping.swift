@@ -128,7 +128,7 @@ extension FluxController {
             var urlRequest = try URLRequest(endpoint)
             authenticator?.mapRequest(&urlRequest)
             
-            if environment == .preview {
+            if environment != .test {
                 try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
             }
             
