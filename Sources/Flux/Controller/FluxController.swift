@@ -152,7 +152,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
             var urlRequest = try URLRequest(endpoint)
             authenticator?.mapRequest(&urlRequest)
             
-            if environment == .preview {
+            if environment != .test {
                 try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
             }
             
