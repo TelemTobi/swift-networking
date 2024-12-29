@@ -6,7 +6,7 @@ extension Error {
         }
         
         if self is DecodingError {
-            return .decodingError(localizedDescription)
+            return .decodingError("\(self)")
         }
         
         return .unknownError(localizedDescription)

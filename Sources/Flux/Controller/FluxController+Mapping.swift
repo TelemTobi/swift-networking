@@ -99,9 +99,7 @@ extension FluxController {
             let (data, response) = try await urlSession.data(for: urlRequest)
             
             #if DEBUG
-            if endpoint.shouldPrintLogs {
-               logRequest(endpoint, urlRequest, response, data)
-            }
+            logRequest(endpoint, urlRequest, response, data)
             #endif
             
             guard response.status.group == .success else {
@@ -117,19 +115,29 @@ extension FluxController {
             return model
             
         } catch {
-            throw(F.init(error.asFluxError))
+            #if DEBUG
+            logError(endpoint, error.asFluxError)
+            #endif
+            throw(error as? F ?? .unknownError(error.localizedDescription))
         }
     }
     
     #if DEBUG
     private func makeMockRequest<T: Decodable & JsonMapper>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
-            if environment == .preview {
+            var urlRequest = try URLRequest(endpoint)
+            authenticator?.mapRequest(&urlRequest)
+            
+            if environment != .test {
                 try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
             }
             
+            let sampleData = endpoint.sampleData ?? Data()
+            
+            logRequest(endpoint, urlRequest, nil, sampleData)
+
             let model = try T
-                .map(endpoint.sampleData ?? Data())
+                .map(sampleData)
                 .decode(
                     into: T.self,
                     using: endpoint.dateDecodingStrategy, endpoint.keyDecodingStrategy
@@ -137,6 +145,7 @@ extension FluxController {
             return model
             
         } catch {
+            logError(endpoint, error.asFluxError)
             throw(F.init(error.asFluxError))
         }
     }

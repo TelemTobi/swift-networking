@@ -116,9 +116,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
             let (data, response) = try await urlSession.data(for: urlRequest)
             
             #if DEBUG
-            if endpoint.shouldPrintLogs {
-               logRequest(endpoint, urlRequest, response, data)
-            }
+            logRequest(endpoint, urlRequest, response, data)
             #endif
             
             guard response.status.group == .success else {
@@ -133,7 +131,10 @@ public class FluxController<E: Endpoint, F: DecodableError> {
             return model
             
         } catch {
-            throw(F.init(error.asFluxError))
+            #if DEBUG
+            logError(endpoint, error.asFluxError)
+            #endif
+            throw(error as? F ?? .unknownError(error.localizedDescription))
         }
     }
     
@@ -148,11 +149,18 @@ public class FluxController<E: Endpoint, F: DecodableError> {
     #if DEBUG
     private func makeMockRequest<T: Decodable>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
-            if environment == .preview {
+            var urlRequest = try URLRequest(endpoint)
+            authenticator?.mapRequest(&urlRequest)
+            
+            if environment != .test {
                 try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
             }
             
-            let model = try (endpoint.sampleData ?? Data()).decode(
+            let sampleData = endpoint.sampleData ?? Data()
+            
+            logRequest(endpoint, urlRequest, nil, sampleData)
+            
+            let model = try (sampleData).decode(
                 into: T.self,
                 using: endpoint.dateDecodingStrategy, endpoint.keyDecodingStrategy
             )
@@ -160,6 +168,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
             return model
             
         } catch {
+            logError(endpoint, error.asFluxError)
             throw(F.init(error.asFluxError))
         }
     }
