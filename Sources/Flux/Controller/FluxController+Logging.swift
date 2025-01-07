@@ -44,6 +44,7 @@ public extension FluxController {
                 .components(separatedBy: "(").first ?? String(describing: endpoint)
             endpointName.append(endpoint.shouldUseSampleData ? " (Mock)" : "")
             
+            print()
             print("⚠️ Error - \(endpointName)")
             print(error.debugDescription)
         }
