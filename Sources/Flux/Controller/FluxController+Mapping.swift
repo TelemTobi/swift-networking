@@ -84,7 +84,7 @@ extension FluxController {
                 let result: T = try await request(endpoint)
                 completion(.success(result))
             } catch {
-                let error = error as? F ?? .unknownError()
+                let error = error as? F ?? .unknownError(error.description)
                 completion(.failure(error))
             }
         }
@@ -118,7 +118,7 @@ extension FluxController {
             #if DEBUG
             logError(endpoint, error.asFluxError)
             #endif
-            throw(error as? F ?? .unknownError(error.localizedDescription))
+            throw(error as? F ?? .unknownError(error.description))
         }
     }
     

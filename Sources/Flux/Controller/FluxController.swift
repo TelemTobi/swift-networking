@@ -101,7 +101,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
                 let result: T = try await request(endpoint)
                 completion(.success(result))
             } catch {
-                let error = error as? F ?? .unknownError()
+                let error = error as? F ?? .unknownError(error.description)
                 completion(.failure(error))
             }
         }
@@ -134,7 +134,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
             #if DEBUG
             logError(endpoint, error.asFluxError)
             #endif
-            throw(error as? F ?? .unknownError(error.localizedDescription))
+            throw(error as? F ?? .unknownError(error.description))
         }
     }
     
