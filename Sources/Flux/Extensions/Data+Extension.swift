@@ -11,11 +11,11 @@ public extension Data {
         do {
             return try jsonDecoder.decode(type, from: self)
         } catch {
-            throw Flux.Error.decodingError("\(error)")
+            throw Flux.Error.decodingError(error.description)
         }
     }
     
-    func decodeJson() throws -> [String: AnyHashable]? {
+    func decodeIntoDictionary() throws -> [String: AnyHashable]? {
         try JSONSerialization.jsonObject(with: self, options: []) as? [String: AnyHashable]
     }
     
