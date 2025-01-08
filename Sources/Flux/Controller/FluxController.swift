@@ -96,12 +96,12 @@ public class FluxController<E: Endpoint, F: DecodableError> {
     ///   The closure takes a single argument of type `Result<T, F>`.
     ///   On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
     public func request<T: Decodable>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
-        Task {
+        Task { @MainActor in
             do {
                 let result: T = try await request(endpoint)
                 completion(.success(result))
             } catch {
-                let error = error as? F ?? .unknownError()
+                let error = error as? F ?? .unknownError(error.description)
                 completion(.failure(error))
             }
         }
@@ -134,7 +134,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
             #if DEBUG
             logError(endpoint, error.asFluxError)
             #endif
-            throw(error as? F ?? .unknownError(error.localizedDescription))
+            throw(error as? F ?? .unknownError(error.description))
         }
     }
     

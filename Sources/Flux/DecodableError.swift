@@ -7,6 +7,7 @@ public protocol DecodableError: Error, Decodable {
 }
 
 public extension DecodableError {
+    static var unknownError: Self { .init(.unknownError(nil)) }
     static var connectionError: Self { .init(.connectionError) }
     static var authenticationError: Self { .init(.authenticationError) }
     

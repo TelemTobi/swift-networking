@@ -79,12 +79,12 @@ extension FluxController {
     ///     The closure takes a single argument of type `Result<T, F>`.
     ///     On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F`.
     public func request<T: Decodable & JsonMapper>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
-        Task {
+        Task { @MainActor in
             do {
                 let result: T = try await request(endpoint)
                 completion(.success(result))
             } catch {
-                let error = error as? F ?? .unknownError()
+                let error = error as? F ?? .unknownError(error.description)
                 completion(.failure(error))
             }
         }
@@ -118,7 +118,7 @@ extension FluxController {
             #if DEBUG
             logError(endpoint, error.asFluxError)
             #endif
-            throw(error as? F ?? .unknownError(error.localizedDescription))
+            throw(error as? F ?? .unknownError(error.description))
         }
     }
     
@@ -142,6 +142,7 @@ extension FluxController {
                     into: T.self,
                     using: endpoint.dateDecodingStrategy, endpoint.keyDecodingStrategy
                 )
+            
             return model
             
         } catch {

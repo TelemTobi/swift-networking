@@ -3,7 +3,7 @@ import Foundation
 public extension URLRequest {
     
     /// Initializes a `URLRequest` from an `Endpoint` instance.
-    init(_ endpoint: Endpoint) throws {
+    init(_ endpoint: Endpoint) throws(Flux.Error) {
         let url = if endpoint.path.isEmpty {
             endpoint.baseURL
         } else {
@@ -18,24 +18,63 @@ public extension URLRequest {
         }
         
         switch endpoint.task {
-        case .empty:
+        case .none:
             break
                 
-        case let .withBody(encodable):
-            let jsonEncoder = JSONEncoder()
-            jsonEncoder.keyEncodingStrategy = endpoint.keyEncodingStrategy
-            jsonEncoder.dateEncodingStrategy = endpoint.dateEncodingStrategy
-            self.httpBody = try jsonEncoder.encode(encodable)
+        case let .rawBody(dictionary):
+            do {
+                self.httpBody = try dictionary.encode(using: endpoint)
+            } catch {
+                throw .encodingError(error.description)
+            }
+            
+        case let .encodableBody(encodable):
+            do {
+                self.httpBody = try encodable.encode(using: endpoint)
+            } catch {
+                throw .encodingError(error.description)
+            }
                 
-        case let .withQueryParameters(parameters):
+        case let .queryParameters(parameters):
             self.url?.append(queryParameters: parameters)
                 
-        case let .withBodyAndQueryParameters(encodable, parameters):
-            let jsonEncoder = JSONEncoder()
-            jsonEncoder.keyEncodingStrategy = endpoint.keyEncodingStrategy
-            jsonEncoder.dateEncodingStrategy = endpoint.dateEncodingStrategy
-            self.httpBody = try jsonEncoder.encode(encodable)
+        case let .rawBodyAndQuery(dictionary, parameters):
             self.url?.append(queryParameters: parameters)
+            
+            do {
+                self.httpBody = try dictionary.encode(using: endpoint)
+            } catch {
+                throw .encodingError(error.description)
+            }
+            
+        case let .encodableBodyAndQuery(encodable, parameters):
+            self.url?.append(queryParameters: parameters)
+            
+            do {
+                self.httpBody = try encodable.encode(using: endpoint)
+            } catch {
+                throw .encodingError(error.description)
+            }
         }
+    }
+}
+
+fileprivate extension Encodable {
+    func encode(using endpoint: Endpoint) throws -> Data {
+        let jsonEncoder = JSONEncoder()
+        jsonEncoder.keyEncodingStrategy = endpoint.keyEncodingStrategy
+        jsonEncoder.dateEncodingStrategy = endpoint.dateEncodingStrategy
+        return try jsonEncoder.encode(self)
+    }
+}
+
+fileprivate extension Dictionary where Key == String, Value == Any {
+    func encode(using endpoint: Endpoint) throws -> Data {
+        let jsonEncoder = JSONEncoder()
+        jsonEncoder.keyEncodingStrategy = endpoint.keyEncodingStrategy
+        jsonEncoder.dateEncodingStrategy = endpoint.dateEncodingStrategy
+        
+        let mappedDictionary = self.mapValues(AnyEncodable.init)
+        return try jsonEncoder.encode(mappedDictionary)
     }
 }
