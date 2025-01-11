@@ -1,11 +1,11 @@
 import Foundation
-@testable import Flux
+@testable import Networking
 
 struct TestError: DecodableError, Equatable {
     
     var debugDescription: String
     
-    init(_ type: Flux.Error) {
+    init(_ type: Networking.Error) {
         self.debugDescription = type.debugDescription
     }
 }

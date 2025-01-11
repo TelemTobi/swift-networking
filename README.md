@@ -1,6 +1,6 @@
-## Flux: A Streamlined Network Client for Swift ⚡
+## Networking: A Streamlined Network Client for Swift ⚡
 
-**Flux** simplifies network requests in your Swift projects, taking the burden off your shoulders. <br/>
+**swift-networking** simplifies network requests in your Swift projects, taking the burden off your shoulders. <br/>
 Focus on building awesome features, and let Flux handle the network communication with a clear and organized approach.
 
 

@@ -11,7 +11,7 @@ public extension Data {
         do {
             return try jsonDecoder.decode(type, from: self)
         } catch {
-            throw Flux.Error.decodingError(error.description)
+            throw Networking.Error.decodingError(error.description)
         }
     }
     

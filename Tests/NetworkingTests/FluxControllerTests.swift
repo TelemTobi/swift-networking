@@ -1,5 +1,5 @@
 import XCTest
-@testable import Flux
+@testable import Networking
 
 final class FluxControllerTests: XCTestCase {
     
@@ -7,7 +7,7 @@ final class FluxControllerTests: XCTestCase {
         baseURL: URL(string: "https://someMadeUpUrl.co.il")!,
         path: "",
         method: .get,
-        task: .empty,
+        task: .none,
         headers: [:],
         keyEncodingStrategy: .convertToSnakeCase,
         dateEncodingStrategy: .iso8601,
@@ -35,7 +35,7 @@ final class FluxControllerTests: XCTestCase {
     }
 
     func testAuthentication() async {
-        let controller = FluxController<TestEndpoint, TestError>(
+        let controller = NetworkingController<TestEndpoint, TestError>(
             environment: .live,
             authenticator: testAuthenticator
         )
@@ -61,7 +61,7 @@ final class FluxControllerTests: XCTestCase {
     }
     
     func testRequest() async {
-        let controller = FluxController<TestEndpoint, TestError>(
+        let controller = NetworkingController<TestEndpoint, TestError>(
             environment: .test,
             authenticator: testAuthenticator
         )

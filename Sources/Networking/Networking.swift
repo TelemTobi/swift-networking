@@ -3,7 +3,7 @@
 
 import Foundation
 
-public enum Flux {
+public enum Networking {
     
     /// An enum representing the different environments your API can be deployed to.
     public enum Environment {

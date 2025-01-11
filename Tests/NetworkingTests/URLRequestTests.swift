@@ -1,5 +1,5 @@
 import XCTest
-@testable import Flux
+@testable import Networking
 
 final class URLRequestTests: XCTestCase {
 
@@ -7,7 +7,7 @@ final class URLRequestTests: XCTestCase {
         baseURL: URL(string: "https://google.com")!,
         path: "",
         method: .get,
-        task: .empty,
+        task: .none,
         headers: [:],
         keyEncodingStrategy: .convertToSnakeCase,
         dateEncodingStrategy: .iso8601,
@@ -55,17 +55,17 @@ final class URLRequestTests: XCTestCase {
         // MARK: With body
         
         let testBody = TestBody(someDate: .now, someCondition: false)
-        testEndpoint.task = .withBody(testBody)
+        testEndpoint.task = .encodableBody(testBody)
         urlRequest = try URLRequest(testEndpoint)
         
         XCTAssertEqual(
-            try urlRequest.httpBody?.decodeJson(),
+            try urlRequest.httpBody?.decodeIntoDictionary(),
             ["some_date": testBody.someDate.ISO8601Format(), "some_condition": false]
         )
         
         // MARK: With query parameters
         
-        testEndpoint.task = .withQueryParameters(["key1": "1", "key2": 2, "key3": true])
+        testEndpoint.task = .queryParameters(["key1": "1", "key2": 2, "key3": true])
         urlRequest = try URLRequest(testEndpoint)
 
         XCTAssertEqual(
@@ -75,15 +75,15 @@ final class URLRequestTests: XCTestCase {
         
         // MARK: With body and query parameters
         
-        testEndpoint.task = .withBodyAndQueryParameters(
-            testBody,
-            parameters: ["key1": "1", "key2": 2, "key3": true]
+        testEndpoint.task = .encodableBodyAndQuery(
+            body: testBody,
+            queryParameters: ["key1": "1", "key2": 2, "key3": true]
         )
         
         urlRequest = try URLRequest(testEndpoint)
         
         XCTAssertEqual(
-            try urlRequest.httpBody?.decodeJson(),
+            try urlRequest.httpBody?.decodeIntoDictionary(),
             ["some_date": testBody.someDate.ISO8601Format(), "some_condition": false]
         )
         

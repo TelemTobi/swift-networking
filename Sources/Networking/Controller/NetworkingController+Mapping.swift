@@ -1,6 +1,6 @@
 import Foundation
 
-extension FluxController {
+extension NetworkingController {
     /// Performs a network request using the provided `Endpoint`.
     ///
     /// This method fetches data from the specified endpoint, processes it using a `JsonMapper` (if implemented),
@@ -129,7 +129,7 @@ extension FluxController {
             authenticator?.mapRequest(&urlRequest)
             
             if environment != .test {
-                try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
+                try await Task.sleep(interval: Networking.DebugConfiguration.delayInterval)
             }
             
             let sampleData = endpoint.sampleData ?? Data()
