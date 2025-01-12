@@ -3,7 +3,7 @@ import Foundation
 public extension URLRequest {
     
     /// Initializes a `URLRequest` from an `Endpoint` instance.
-    init(_ endpoint: Endpoint) throws(Flux.Error) {
+    init(_ endpoint: Endpoint) throws(Networking.Error) {
         let url = if endpoint.path.isEmpty {
             endpoint.baseURL
         } else {

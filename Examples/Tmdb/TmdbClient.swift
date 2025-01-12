@@ -1,12 +1,12 @@
 import Foundation
-import Flux
+import Networking
 
 struct TmdbClient {
     
     private let authenticator: Authenticator
     private let controller: FluxController<TmdbEndpoint, TmdbError>
     
-    init(environment: Flux.Environment = .live) {
+    init(environment: Networking.Environment = .live) {
         authenticator = TmdbAuthenticator()
         controller = FluxController(authenticator: authenticator, environment: environment)
     }

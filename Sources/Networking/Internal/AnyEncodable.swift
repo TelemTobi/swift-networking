@@ -1,10 +1,3 @@
-//
-//  AnyEncodable.swift
-//  Flux
-//
-//  Created by Telem Tobi on 07/01/2025.
-//
-
 import Foundation
 
 internal struct AnyEncodable: Encodable {

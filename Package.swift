@@ -4,18 +4,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "Flux",
+    name: "swift-networking",
     platforms: [.iOS("13.0"), .macOS("10.15.0")],
     products: [
-        .library(name: "Flux", targets: ["Flux"]),
+        .library(name: "Networking", targets: ["Networking"]),
     ],
     targets: [
         .target(
-            name: "Flux"
+            name: "Networking"
         ),
         .testTarget(
-            name: "FluxTests",
-            dependencies: ["Flux"],
+            name: "NetworkingTests",
+            dependencies: ["Networking"],
             resources: [.process("Resources")]
         )
     ]

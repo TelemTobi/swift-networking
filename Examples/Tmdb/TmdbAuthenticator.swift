@@ -1,5 +1,5 @@
 import Foundation
-import Flux
+import Networking
 
 struct TmdbAuthenticator: Authenticator {
     

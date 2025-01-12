@@ -32,7 +32,7 @@ public enum HttpTask {
     ///   - body: A dictionary of `[String: Any]` containing the data to be included in the request body.
     ///   - queryParameters: A dictionary of `[String: Any]` representing the query parameters.
     ///     Both dictionaries should include JSON-compatible types such as strings, numbers, and booleans.
-    case rawBodyAndQuery(_ body: [String: Any], queryParameters: [String: Any])
+    case rawBodyAndQuery(body: [String: Any], queryParameters: [String: Any])
 
     /// A request with an `Encodable` object in the body and query parameters encoded in the URL.
     ///
@@ -41,6 +41,6 @@ public enum HttpTask {
     ///     a custom struct, or any type conforming to `Encodable`.
     ///   - queryParameters: A dictionary of `[String: Any]` representing the query parameters.
     ///     Values can include strings, numbers, booleans, and other JSON-compatible types.
-    case encodableBodyAndQuery(_ encodable: Encodable, queryParameters: [String: Any])
+    case encodableBodyAndQuery(body: Encodable, queryParameters: [String: Any])
 
 }

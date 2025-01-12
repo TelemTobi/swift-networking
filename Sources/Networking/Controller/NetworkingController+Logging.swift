@@ -1,6 +1,6 @@
 import Foundation
 
-public extension FluxController {
+public extension NetworkingController {
     
     #if DEBUG
     func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse?, _ data: Data) {
@@ -36,7 +36,7 @@ public extension FluxController {
         }
     }
     
-    func logError(_ endpoint: Endpoint, _ error: Flux.Error) {
+    func logError(_ endpoint: Endpoint, _ error: Networking.Error) {
         guard endpoint.shouldPrintLogs else { return }
         
         loggingQueue.async {

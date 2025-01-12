@@ -1,10 +1,10 @@
 import Foundation
 
 /// A networking controller for making requests with features like authentication, environment handling, json mapping and error handling.
-public class FluxController<E: Endpoint, F: DecodableError> {
+public class NetworkingController<E: Endpoint, F: DecodableError> {
     
     /// The current environment, either `.live`, `.test`, or `.preview`.
-    public var environment: Flux.Environment = .live
+    public var environment: Networking.Environment = .live
     
     /// An optional authentication provider to be used with the requests.
     public var authenticator: Authenticator? = nil
@@ -31,7 +31,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
     /// * **Authentication:**
     ///   * The controller checks the authentication state through the `authenticator` (if provided).
     ///     If authentication is required and fails, a `.failure(.authenticationError)` result is returned.
-    public init(environment: Flux.Environment = .live, authenticator: Authenticator? = nil, configuration: URLSessionConfiguration = .default, delegate: URLSessionDelegate? = nil) {
+    public init(environment: Networking.Environment = .live, authenticator: Authenticator? = nil, configuration: URLSessionConfiguration = .default, delegate: URLSessionDelegate? = nil) {
         self.environment = environment
         self.authenticator = authenticator
         
@@ -153,7 +153,7 @@ public class FluxController<E: Endpoint, F: DecodableError> {
             authenticator?.mapRequest(&urlRequest)
             
             if environment != .test {
-                try await Task.sleep(interval: Flux.DebugConfiguration.delayInterval)
+                try await Task.sleep(interval: Networking.DebugConfiguration.delayInterval)
             }
             
             let sampleData = endpoint.sampleData ?? Data()

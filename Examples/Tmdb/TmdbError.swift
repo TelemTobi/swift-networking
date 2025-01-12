@@ -1,5 +1,5 @@
 import Foundation
-import Flux
+import Networking
 
 struct TmdbError: DecodableError {
     
@@ -11,7 +11,7 @@ struct TmdbError: DecodableError {
         case developerMessage = "status_message"
     }
     
-    init(_ type: Flux.Error) {
+    init(_ type: Networking.Error) {
         statusCode = -1
         developerMessage = type.localizedDescription
     }

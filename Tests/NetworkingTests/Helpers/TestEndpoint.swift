@@ -1,5 +1,5 @@
 import Foundation
-@testable import Flux
+@testable import Networking
 
 struct TestEndpoint: Endpoint {
     var baseURL: URL
