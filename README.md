@@ -18,6 +18,7 @@ enum MyAPI {
 
 extension MyAPI: Endpoint {
     var baseURL: URL { URL(string: "https://your-api.com/api/v1")! }
+
     var path: String {
         switch self {
         case let .getUser(userId): "/users/\(userId)"
@@ -25,6 +26,7 @@ extension MyAPI: Endpoint {
         case .createPost: "/posts"
         }
     }
+
     var method: HttpMethod {
         switch self {
         case .getUser: .get
@@ -32,6 +34,7 @@ extension MyAPI: Endpoint {
         case .createPost: .post
         }
     }
+
     var task: HttpTask {
         switch self {
         case .getUser:
