@@ -1,135 +1,193 @@
-## Networking: A Streamlined Network Client for Swift ⚡
+# Simplified Networking for Swift ⚡
 
-**swift-networking** simplifies network requests in your Swift projects, taking the burden off your shoulders. <br/>
-Focus on building awesome features, and let Flux handle the network communication with a clear and organized approach.
+**Networking** makes network requests in Swift easier and more maintainable. 🚀  
+With a clean API, environment switching, and optional features like authentication and JSON mapping, you can focus on building great apps while we handle the rest.
 
+---
 
-## Features
+## Quick Example 🌟
 
-- [x] **Organized API Calls:** Define your API endpoints in a single, well-structured Endpoint enum. Keep your code clean and maintainable by focusing on the logic of your application, not URL construction.
-- [x] **Environment Handling:** Seamlessly switch between live, test, and preview environments. Make realistic test data with ease in the test environment, and provide sample data for SwiftUI previews without actual network calls.
-- [x] **Authentication (Optional):** Integrate your authentication provider with Flux for a smooth user experience. Flux handles authentication checks and errors for you.
-- [x] **JSON Mapping (Optional):** Process, validate, or transform incoming JSON data before decoding using JsonMapper. Ideal for cases where the raw response needs adjustments.
-- [x] **Error Handling:** Flux gracefully handles network errors and provides informative error messages. Spend less time debugging network issues and more time building!
-- [x] **Logging Control:** Control logging verbosity for specific endpoints with the shouldPrintLogs parameter.
-
-
-## Installation
-### Swift Package Manager
-
-You can use Swift Package Manager to integrate **Flux** into your Xcode project. 
-
-In Xcode, go to `File` > `Swift Packages` > `Add Package Dependency` and enter the repository URL:
-
-```
-https://github.com/TelemTobi/Flux.git
-```
-
-
-## Usage
-
-**For a complete example, refer to the example project in the exaples folder of this repo.**
-
-### 1. Define Your Endpoints:
-
-Flux utilizes the power of Swift enums to define your API endpoints. Here's an example:
+Here’s how easy it is to define and call an API endpoint with **Networking**:
 
 ```swift
 enum MyAPI {
-  case getUser(userId: String)
-  case updateProfile(name: String, email: String)
+    case getUser(userId: String)
+    case updateProfile(name: String, email: String)
+    case createPost(threadId: String, post: Post)
 }
 
 extension MyAPI: Endpoint {
-  
-  var baseURL: URL {
-    return URL(string: "https://your-api.com/api/v1")!
-  }
-  
-  var path: String {
-    switch self {
-    case let .getUser(userId): "/users/\(userId)"
-    case .updateProfile: "/users/me"
+    var baseURL: URL { URL(string: "https://your-api.com/api/v1")! }
+    var path: String {
+        switch self {
+        case let .getUser(userId): "/users/\(userId)"
+        case .updateProfile: "/users/me"
+        case .createPost: "/posts"
+        }
     }
-  }
-  
-  var method: HttpMethod {
-    switch self {
-    case .getUser: .get
-    case .updateProfile: .put
+    var method: HttpMethod {
+        switch self {
+        case .getUser: .get
+        case .updateProfile: .put
+        case .createPost: .post
+        }
     }
-  }
-  
-  var task: HttpTask {
-    switch self {
-    case .getUser:
-      .empty
+    var task: HttpTask {
+        switch self {
+        case .getUser:
+          return .empty
 
-    case let .updateProfile(name, email):
-      .withBody(["name": name, "email": email]) // Alternatively, an encodable object can be provided
+        case let .updateProfile(name, email):
+          return .rawBody(["name": name, "email": email])
+
+        case let .createPost(threadId, post): 
+          return .encodableBodyAndQuery(
+            body: post,
+            queryParameters: ["thread": threadId]
+          )
+        }
     }
-  }
 }
-  
-  // You can set other optional properties here if needed
 ```
 
-### 2. Construct a URLRequest (Optional):
+That’s it! 💡 You’ve just made an API to work with. For more details, dive into the sections below.
 
-Flux provides the flexibility to construct a URLRequest directly using the Endpoint enum. This approach gives you full control over the request configuration.
+---
+
+## Why Use Networking? 🛠️
+
+- **Organized API Definitions:** Define your endpoints with Swift enums for clarity and reusability.
+- **Environment Management:** Easily switch between live, test, and preview environments.
+- **Authentication (Optional):** Integrate your auth provider for secure API access and request mapping.
+- **JSON Mapping (Optional):** Pre-process responses before decoding to suit your app's needs.
+- **Error Handling:** Get meaningful errors to speed up debugging.
+- **Flexible Logging:** Adjust verbosity to your needs for better debugging.
+
+---
+
+## Installation 🚀
+
+### Swift Package Manager
+
+Add **Networking** to your project via Swift Package Manager:  
+1. In Xcode, go to **File > Swift Packages > Add Package Dependency**.  
+2. Enter the repository URL:
+
+   ```
+   https://github.com/telemtobi/swift-networking.git
+   ```
+
+3. Select your preferred version and finish.
+
+---
+
+## Getting Started 🏁
+
+### 1. Define Your API Endpoints
+
+Use Swift enums to describe your API as seen in the example above ☝️
+
+### 2. Make a Network Request
+
+#### Using `NetworkingController`:
+
+This approach offers authentication handling, environment switching, and error management for you:
 
 ```swift
-let userEndpoint = MyAPI.getUser(userId: "123")
-var urlRequest = URLRequest(userEndpoint)
+let controller = NetworkingController<MyAPI, MyError>()
 
-try await URLSession.shared.data(for: urlRequest)
-```
-
-### 3. Use the FluxController (Convenience):
-
-Flux also offers a convenient FluxController class that handles common network tasks for you. The FluxController takes care of authentication, environment handling, and error management.
-
-```swift
-let controller = FluxController<MyAPI, MyError>()
-
-// Make a network request with async/await
 do {
-    let result = try await controller.request(.getUser(userId: "123"))
+    let response = try await controller.request(.getUser(userId: "123"))
+    // ...
 } catch {
     // Handle `MyError`
 }
+```
 
-// Make a network request with completion handler
-controller.request(.getUser(userId: "123")) { result in
-    switch result {
-    case let .success(user):
-        // Handle success
-    case let .failure(error):
-        // Handle error
-    }
+#### Using `URLRequest` Directly (Optional):
+
+For more control, construct a `URLRequest` yourself:
+
+```swift
+let userEndpoint = MyAPI.getUser(userId: "123")
+let urlRequest = URLRequest(userEndpoint)
+
+let _ = try await URLSession.shared.data(for: urlRequest
+```
+
+---
+
+## Advanced Features 🔧
+
+### Environment Switching
+
+Set up multiple environments (e.g., live, test, preview) effortlessly:
+
+```swift
+struct MyApiClient {
+  let controller = NetworkingController<MyAPI, MyError>(
+      environment: .live
+  )
+}
+```
+These environments synegrates nicely with PointFree's [Dependencies](https://github.com/pointfreeco/swift-dependencies) package.
+```swift
+extension MyApiClient: DependencyKey {
+  static let liveValue = MyApiClient(environment: .live)
+  static let testValue = MyApiClient(environment: .test)
+  static let previewValue = MyApiClient(environment: .preview)
 }
 ```
 
-**Remember: Using FluxController is entirely optional. You can still construct your own URLRequest using the Endpoint enum if you prefer more control over the network layer.**
+### Authentication
 
+Plug in your auth provider for seamless integration:
 
-## Requirements
+```swift
+let controller = NetworkingController<MyAPI, MyError>(
+    authenticator: MyAuthenticator()
+)
+```
+Using an authenticator, requests can be seamlessly configured to include general authentication headers, such as tokens or API keys.
 
-Swift 5.x
-Xcode 12.x or later
+### Logging Control
 
+Enable or disable logging for specific endpoints:
 
-## License
+```swift
+extension MyAPI: Endpoint {
+  ...
+  var shouldPrintLogs: Bool {
+    switch self { ... }
+  }
+}
+```
+or alternatively, change the global configuration:
+```swift
+Netowrking.DebugConfiguration.shouldPrintLogs = true
+```
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/TelemTobi/Flux/blob/main/LICENSE.txt) file for more details.
+---
 
-## Contributing
+## Requirements 📋
 
-We welcome contributions to Flux! Feel free to open issues or pull requests to improve the library. Please follow these guidelines:
+- **Swift**: 5.x or later  
+- **Xcode**: 12.x or later  
 
-- Adhere to the existing code style and conventions.
-- Write clear and concise code with documentation.
-- Include unit tests for your changes.
-- Open an issue to discuss any significant changes before submitting a pull request.
+---
 
-We hope you enjoy using Flux! ✨
+## Contributing 🙌
+
+We welcome contributions! 🎉 To get started:  
+- Open issues or pull requests on [GitHub](https://github.com/TelemTobi/Networking).  
+- Follow the existing code style and include unit tests.  
+
+---
+
+## License 📄
+
+**Networking** is licensed under the MIT License. See the [LICENSE](https://github.com/TelemTobi/Networking/blob/main/LICENSE.txt) for details.
+
+---
+
+Happy coding with **Networking**! 🚀
