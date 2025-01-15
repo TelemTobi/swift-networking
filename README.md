@@ -38,10 +38,13 @@ extension MyAPI: Endpoint {
     var task: HttpTask {
         switch self {
         case .getUser:
-            return .empty
+            return .none
 
         case let .updateProfile(name, email):
-            return .rawBody(["name": name, "email": email])
+            return .rawBody([
+                "user_name": name,
+                "email_address": email
+            ])
 
         case let .createPost(threadId, post): 
             return .encodableBodyAndQuery(
