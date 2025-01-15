@@ -5,9 +5,9 @@ With a clean API, environment switching, and optional features like authenticati
 
 ---
 
-## Quick Example 🌟
+## Quick Example
 
-Here’s how easy it is to define and call an API endpoint with **Networking**:
+Here’s how easy it is to define API endpoints with **Networking**:
 
 ```swift
 enum MyAPI {
@@ -38,16 +38,16 @@ extension MyAPI: Endpoint {
     var task: HttpTask {
         switch self {
         case .getUser:
-          return .empty
+            return .empty
 
         case let .updateProfile(name, email):
-          return .rawBody(["name": name, "email": email])
+            return .rawBody(["name": name, "email": email])
 
         case let .createPost(threadId, post): 
-          return .encodableBodyAndQuery(
-            body: post,
-            queryParameters: ["thread": threadId]
-          )
+            return .encodableBodyAndQuery(
+                body: post,
+                queryParameters: ["thread": threadId]
+            )
         }
     }
 }
@@ -115,12 +115,12 @@ For more control, construct a `URLRequest` yourself:
 let userEndpoint = MyAPI.getUser(userId: "123")
 let urlRequest = URLRequest(userEndpoint)
 
-let _ = try await URLSession.shared.data(for: urlRequest
+let _ = try await URLSession.shared.data(for: urlRequest)
 ```
 
 ---
 
-## Advanced Features 🔧
+## Key Features 🔑
 
 ### Environment Switching
 
@@ -133,7 +133,7 @@ struct MyApiClient {
   )
 }
 ```
-These environments synegrates nicely with PointFree's [Dependencies](https://github.com/pointfreeco/swift-dependencies) package.
+These environments integrate nicely with PointFree's [Dependencies](https://github.com/pointfreeco/swift-dependencies) package:
 ```swift
 extension MyApiClient: DependencyKey {
   static let liveValue = MyApiClient(environment: .live)
@@ -165,9 +165,9 @@ extension MyAPI: Endpoint {
   }
 }
 ```
-or alternatively, change the global configuration:
+Alternatively, change the global configuration:
 ```swift
-Netowrking.DebugConfiguration.shouldPrintLogs = true
+Networking.DebugConfiguration.shouldPrintLogs = true
 ```
 
 ---
@@ -181,9 +181,14 @@ Netowrking.DebugConfiguration.shouldPrintLogs = true
 
 ## Contributing 🙌
 
-We welcome contributions! 🎉 To get started:  
-- Open issues or pull requests on [GitHub](https://github.com/TelemTobi/Networking).  
-- Follow the existing code style and include unit tests.  
+We’d love to see your ideas! 🧠 Whether it’s fixing bugs, improving documentation, or adding new features, your contributions are welcome.  
+
+### How to Contribute:
+1. Fork the repository and create your feature branch.  
+2. Write clean, maintainable code with unit tests.  
+3. Submit a pull request for review.  
+
+If you encounter an issue or have a feature request, feel free to open a GitHub issue!
 
 ---
 
