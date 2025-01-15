@@ -4,7 +4,7 @@ import Networking
 enum TmdbEndpoint {
     case movieGenres
     case searchMovies(query: String)
-    case favorite(body: FavoriteRequstBody)
+    case favorite(_ movieId: Int, isFavorite: Bool)
 }
 
 extension TmdbEndpoint: Endpoint {
@@ -32,13 +32,17 @@ extension TmdbEndpoint: Endpoint {
     var task: HTTPTask {
         switch self {
         case .movieGenres:
-            .empty
+            .none
             
         case let .searchMovies(searchQuery):
-            .withQueryParameters(["query": searchQuery])
+            .queryParameters(["query": searchQuery])
             
-        case let .favorite(requestBody):
-            .withBody(requestBody)
+        case let .favorite(id, isFavorite):
+            .rawBody([
+                "media_id": id,
+                "favorite": isFavorite,
+                "media_type": "movie"
+            ])
         }
     }
     

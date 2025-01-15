@@ -42,19 +42,6 @@ struct Movie: Codable, Identifiable {
     var voteCount: Int?
 }
 
-struct FavoriteRequstBody: Encodable {
-    
-    let movieId: Int
-    let isFavorite: Bool
-    let mediaType: String = "movie"
-    
-    enum CodingKeys: String, CodingKey {
-        case movieId = "media_id"
-        case isFavorite = "favorite"
-        case mediaType = "media_type"
-    }
-}
-
 struct EmptyResponse: Decodable {
     
 }
