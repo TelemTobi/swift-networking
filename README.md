@@ -178,7 +178,7 @@ Networking.DebugConfiguration.shouldPrintLogs = true
 ## Requirements 📋
 
 - **Swift**: 5.x or later  
-- **Xcode**: 12.x or later  
+- **Xcode**: 15.x or later  
 
 ---
 
