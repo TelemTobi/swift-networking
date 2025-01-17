@@ -6,7 +6,7 @@ import Foundation
 public enum Networking {
     
     /// An enum representing the different environments your API can be deployed to.
-    public enum Environment {
+    public enum Environment: Sendable {
         /// The production environment where live user traffic occurs.
         case live
 
