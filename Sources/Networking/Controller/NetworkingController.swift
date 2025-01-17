@@ -1,7 +1,7 @@
 import Foundation
 
 /// A networking controller for making requests with features like authentication, environment handling, json mapping and error handling.
-public class NetworkingController<E: Endpoint, F: DecodableError> {
+public actor NetworkingController<E: Endpoint, F: DecodableError> {
     
     /// The current environment, either `.live`, `.test`, or `.preview`.
     public var environment: Networking.Environment = .live
@@ -47,7 +47,7 @@ public class NetworkingController<E: Endpoint, F: DecodableError> {
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
     /// - Throws: An error of type `F` if the request fails due to an issue like authentication, connection, or decoding errors.
     /// - Returns: The decoded response model of type `T`.
-    public func request<T: Decodable>(_ endpoint: E) async throws(F) -> T {
+    public func request<T: Decodable & Sendable>(_ endpoint: E) async throws(F) -> T {
         #if DEBUG
         guard environment == .live, !endpoint.shouldUseSampleData else {
             return try await makeMockRequest(endpoint)
@@ -79,7 +79,7 @@ public class NetworkingController<E: Endpoint, F: DecodableError> {
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
     /// - Returns: An asynchronous result of type `Result<T, F>`.
     ///     On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
-    public func request<T: Decodable>(_ endpoint: E) async -> Result<T, F> {
+    public func request<T: Decodable & Sendable>(_ endpoint: E) async -> Result<T, F> {
         do {
             let result: T = try await request(endpoint)
             return .success(result)
@@ -95,8 +95,8 @@ public class NetworkingController<E: Endpoint, F: DecodableError> {
     ///   - completion: A closure that will be called asynchronously with the result of the network request.
     ///   The closure takes a single argument of type `Result<T, F>`.
     ///   On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
-    public func request<T: Decodable>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
-        Task { @MainActor in
+    public func request<T: Decodable & Sendable>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
+        Task {
             do {
                 let result: T = try await request(endpoint)
                 completion(.success(result))
@@ -107,7 +107,7 @@ public class NetworkingController<E: Endpoint, F: DecodableError> {
         }
     }
     
-    private func makeRequest<T: Decodable>(_ endpoint: Endpoint) async throws(F) -> T {
+    private func makeRequest<T: Decodable & Sendable>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
             

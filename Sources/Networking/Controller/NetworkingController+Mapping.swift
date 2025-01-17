@@ -14,7 +14,7 @@ extension NetworkingController {
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
     /// - Throws: An error of type `F` if the request fails due to issues like authentication, connection, or decoding errors.
     /// - Returns: The decoded response model of type `T`.
-    public func request<T: Decodable & JsonMapper>(_ endpoint: E) async throws(F) -> T {
+    public func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E) async throws(F) -> T {
         #if DEBUG
         guard environment == .live, !endpoint.shouldUseSampleData else {
             return try await makeMockRequest(endpoint)
@@ -54,7 +54,7 @@ extension NetworkingController {
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
     /// - Returns: An asynchronous `Result<T, F>`. On success, it contains the decoded model of type `T`.
     ///   On failure, it contains an error of type `F` describing the issue.
-    public func request<T: Decodable & JsonMapper>(_ endpoint: E) async -> Result<T, F> {
+    public func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E) async -> Result<T, F> {
         do {
             let result: T = try await request(endpoint)
             return .success(result)
@@ -78,8 +78,8 @@ extension NetworkingController {
     ///   - completion: A closure that is called asynchronously with the result of the network request.
     ///     The closure takes a single argument of type `Result<T, F>`.
     ///     On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F`.
-    public func request<T: Decodable & JsonMapper>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
-        Task { @MainActor in
+    public func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
+        Task {
             do {
                 let result: T = try await request(endpoint)
                 completion(.success(result))
@@ -90,7 +90,7 @@ extension NetworkingController {
         }
     }
     
-    private func makeRequest<T: Decodable & JsonMapper>(_ endpoint: Endpoint) async throws(F) -> T {
+    private func makeRequest<T: Decodable & Sendable & JsonMapper>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
             

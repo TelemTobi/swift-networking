@@ -14,7 +14,7 @@ public enum AuthenticationState {
 }
 
 /// A protocol defining functionalities for an authentication provider.
-public protocol Authenticator {
+public protocol Authenticator: Sendable {
     
     /// The current authentication state of the user.
     var state: AuthenticationState { get }
