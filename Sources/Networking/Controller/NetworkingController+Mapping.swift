@@ -63,33 +63,6 @@ extension NetworkingController {
         }
     }
     
-    /// Performs a network request using the provided `Endpoint` and calls a completion handler with the result.
-    ///
-    /// This method fetches data from the specified endpoint, processes it using a `JsonMapper` (if implemented),
-    /// and then decodes the transformed data into the specified model type. The completion handler is invoked
-    /// with the result.
-    ///
-    /// ### JSON Mapping
-    /// If the response data requires additional processing, the `JsonMapper.map(_:)` method is called
-    /// before decoding into the target type.
-    ///
-    /// - Parameters:
-    ///   - endpoint: The `Endpoint` object defining the API endpoint and request parameters.
-    ///   - completion: A closure that is called asynchronously with the result of the network request.
-    ///     The closure takes a single argument of type `Result<T, F>`.
-    ///     On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F`.
-    public func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
-        Task {
-            do {
-                let result: T = try await request(endpoint)
-                completion(.success(result))
-            } catch {
-                let error = error as? F ?? .unknownError(error.description)
-                completion(.failure(error))
-            }
-        }
-    }
-    
     private func makeRequest<T: Decodable & Sendable & JsonMapper>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)

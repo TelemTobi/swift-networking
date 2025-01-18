@@ -1,7 +1,7 @@
 import Foundation
 
 /// A networking controller for making requests with features like authentication, environment handling, json mapping and error handling.
-public actor NetworkingController<E: Endpoint, F: DecodableError> {
+public final class NetworkingController<E: Endpoint, F: DecodableError> {
     
     /// The current environment, either `.live`, `.test`, or `.preview`.
     public var environment: Networking.Environment = .live
@@ -85,25 +85,6 @@ public actor NetworkingController<E: Endpoint, F: DecodableError> {
             return .success(result)
         } catch {
             return .failure(error)
-        }
-    }
-    
-    /// Performs a network request using the provided `Endpoint` and calls a completion handler with the result.
-    ///
-    /// - Parameters:
-    ///   - endpoint: The `Endpoint` object defining the API endpoint and request parameters.
-    ///   - completion: A closure that will be called asynchronously with the result of the network request.
-    ///   The closure takes a single argument of type `Result<T, F>`.
-    ///   On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
-    public func request<T: Decodable & Sendable>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
-        Task {
-            do {
-                let result: T = try await request(endpoint)
-                completion(.success(result))
-            } catch {
-                let error = error as? F ?? .unknownError(error.description)
-                completion(.failure(error))
-            }
         }
     }
     

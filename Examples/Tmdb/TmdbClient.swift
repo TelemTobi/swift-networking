@@ -18,8 +18,4 @@ struct TmdbClient {
     func searchMovies(query: String) async -> Result<MovieList, TmdbError> {
         await controller.request(.searchMovies(query: query))
     }
-    
-    func addFavorite(movieId: Int, isFavorite: Bool, completion: @escaping (Result<EmptyResponse, TmdbError>) -> Void) {
-        return await controller.request(.favorite(movieId, isFavorite: isFavorite), completion: completion)
-    }
 }
