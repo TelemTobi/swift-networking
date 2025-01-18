@@ -10,13 +10,13 @@ With a clean API, environment switching, and optional features like authenticati
 Here’s how easy it is to define API endpoints with **Networking**:
 
 ```swift
-enum MyAPI {
+enum MyEndpoint {
     case getUser(userId: String)
     case updateProfile(name: String, email: String)
     case createPost(threadId: String, post: Post)
 }
 
-extension MyAPI: Endpoint {
+extension MyEndpoint: Endpoint {
     var baseURL: URL { URL(string: "https://your-api.com/api/v1")! }
 
     var path: String {
@@ -100,7 +100,7 @@ Use Swift enums to describe your API as seen in the example above ☝️
 This approach offers authentication handling, environment switching, and error management for you:
 
 ```swift
-let controller = NetworkingController<MyAPI, MyError>()
+let controller = NetworkingController<MyEndpoint, MyError>()
 
 do {
     let response = try await controller.request(.getUser(userId: "123"))
@@ -115,7 +115,7 @@ do {
 For more control, construct a `URLRequest` yourself:
 
 ```swift
-let userEndpoint = MyAPI.getUser(userId: "123")
+let userEndpoint = MyEndpoint.getUser(userId: "123")
 let urlRequest = URLRequest(userEndpoint)
 
 let _ = try await URLSession.shared.data(for: urlRequest)
@@ -131,7 +131,7 @@ Set up multiple environments (e.g., live, test, preview) effortlessly:
 
 ```swift
 struct MyApiClient {
-  let controller = NetworkingController<MyAPI, MyError>(
+  let controller = NetworkingController<MyEndpoint, MyError>(
       environment: .live
   )
 }
@@ -150,7 +150,7 @@ extension MyApiClient: DependencyKey {
 Plug in your auth provider for seamless integration:
 
 ```swift
-let controller = NetworkingController<MyAPI, MyError>(
+let controller = NetworkingController<MyEndpoint, MyError>(
     authenticator: MyAuthenticator()
 )
 ```
@@ -161,7 +161,7 @@ Using an authenticator, requests can be seamlessly configured to include general
 Enable or disable logging for specific endpoints:
 
 ```swift
-extension MyAPI: Endpoint {
+extension MyEndpoint: Endpoint {
   ...
   var shouldPrintLogs: Bool {
     switch self { ... }
