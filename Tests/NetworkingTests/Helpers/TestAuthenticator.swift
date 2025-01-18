@@ -4,8 +4,8 @@ import Foundation
 struct TestAuthenticator: Authenticator {
     
     var state: AuthenticationState
-    var authenticate: () -> Bool
-    var mapRequest: (inout URLRequest) -> Void
+    var authenticate: @Sendable () -> Bool
+    var mapRequest: @Sendable (inout URLRequest) -> Void
     
     func authenticate() async throws -> Bool {
         authenticate()

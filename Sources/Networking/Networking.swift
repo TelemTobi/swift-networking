@@ -6,7 +6,7 @@ import Foundation
 public enum Networking {
     
     /// An enum representing the different environments your API can be deployed to.
-    public enum Environment {
+    public enum Environment: Sendable {
         /// The production environment where live user traffic occurs.
         case live
 
@@ -43,9 +43,9 @@ public enum Networking {
     /// A namespace containing configuration for debug requests.
     public enum DebugConfiguration {
         /// Static property defining the delay (in seconds) for stub requests in the preview environment.
-        static var delayInterval: TimeInterval = 1.0
+        nonisolated(unsafe) static var delayInterval: TimeInterval = 1.0
         
         /// The global default value for the Endpoint's `shouldPrintLogs`.
-        static var shouldPrintLogs: Bool = true
+        nonisolated(unsafe) static var shouldPrintLogs: Bool = true
     }
 }

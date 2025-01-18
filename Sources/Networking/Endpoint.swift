@@ -1,9 +1,7 @@
 import Foundation
 
-import Foundation
-
 /// Defines the specifications required to construct a `URLRequest`.
-public protocol Endpoint {
+public protocol Endpoint: Sendable {
 
     /// The base URL for the API endpoint.
     ///

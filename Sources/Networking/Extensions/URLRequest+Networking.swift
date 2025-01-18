@@ -68,7 +68,7 @@ fileprivate extension Encodable {
     }
 }
 
-fileprivate extension Dictionary where Key == String, Value == Any {
+fileprivate extension Dictionary where Key == String, Value == (any Sendable) {
     func encode(using endpoint: Endpoint) throws -> Data {
         let jsonEncoder = JSONEncoder()
         jsonEncoder.keyEncodingStrategy = endpoint.keyEncodingStrategy

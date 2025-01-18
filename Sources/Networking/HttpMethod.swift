@@ -1,7 +1,7 @@
 import Foundation
 
 /// The HTTP method used in a network request.
-public enum HttpMethod: String {
+public enum HttpMethod: String, Sendable {
 
     /// `CONNECT` method.
     case connect
