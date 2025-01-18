@@ -88,6 +88,27 @@ public final class NetworkingController<E: Endpoint, F: DecodableError> {
         }
     }
     
+    #if swift(<6.0)
+    /// Performs a network request using the provided `Endpoint` and calls a completion handler with the result.
+    ///
+    /// - Parameters:
+    ///   - endpoint: The `Endpoint` object defining the API endpoint and request parameters.
+    ///   - completion: A closure that will be called asynchronously with the result of the network request.
+    ///   The closure takes a single argument of type `Result<T, F>`.
+    ///   On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
+    public func request<T: Decodable & Sendable>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
+        Task {
+            do {
+                let result: T = try await request(endpoint)
+                completion(.success(result))
+            } catch {
+                let error = error as? F ?? .unknownError(error.description)
+                completion(.failure(error))
+            }
+        }
+    }
+    #endif
+    
     private func makeRequest<T: Decodable & Sendable>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
