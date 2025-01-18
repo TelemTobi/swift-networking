@@ -132,7 +132,7 @@ public actor NetworkingController<E: Endpoint, F: DecodableError> {
             
         } catch {
             #if DEBUG
-            logError(endpoint, error.asFluxError)
+            logError(endpoint, error.asNetworkingError)
             #endif
             throw(error as? F ?? .unknownError(error.description))
         }
@@ -168,8 +168,8 @@ public actor NetworkingController<E: Endpoint, F: DecodableError> {
             return model
             
         } catch {
-            logError(endpoint, error.asFluxError)
-            throw(F.init(error.asFluxError))
+            logError(endpoint, error.asNetworkingError)
+            throw(F.init(error.asNetworkingError))
         }
     }
     #endif

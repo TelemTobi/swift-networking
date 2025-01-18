@@ -4,7 +4,7 @@ extension Error {
         "\(self)"
     }
     
-    var asFluxError: Networking.Error {
+    var asNetworkingError: Networking.Error {
         if let fluxError = self as? Networking.Error {
             return fluxError
         }

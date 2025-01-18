@@ -1,7 +1,7 @@
 import XCTest
 @testable import Networking
 
-final class FluxControllerTests: XCTestCase {
+final class NetworkingControllerTests: XCTestCase {
     
     var testEndpoint = TestEndpoint(
         baseURL: URL(string: "https://someMadeUpUrl.co.il")!,
