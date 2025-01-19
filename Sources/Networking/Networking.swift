@@ -46,6 +46,6 @@ public enum Networking {
         nonisolated(unsafe) static var delayInterval: TimeInterval = 1.0
         
         /// The global default value for the Endpoint's `shouldPrintLogs`.
-        nonisolated(unsafe) static var shouldPrintLogs: Bool = true
+        nonisolated(unsafe) static var shouldPrintLogs: Bool = false
     }
 }
