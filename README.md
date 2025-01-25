@@ -1,13 +1,23 @@
-# Simplified Networking for Swift ⚡
+# Swift Networking
 
-**Networking** makes network requests in Swift easier and more maintainable. 🚀  
-With a clean API, environment switching, and optional features like authentication and JSON mapping, you can focus on building great apps while we handle the rest.
+A Swift package that makes network requests easier and more maintainable in your iOS, macOS, and other Apple platform applications. It provides a type-safe, clean API with powerful features like environment switching, authentication handling, and JSON mapping.
 
----
+[![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
+[![SPM](https://img.shields.io/badge/SPM-Compatible-brightgreen.svg)](https://swift.org/package-manager)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+## Features
+
+- ✨ Type-safe API endpoints using Swift enums
+- 🌍 Built-in environment switching (live, test, preview)
+- 🔒 Optional authentication handling
+- 🗺️ Flexible JSON mapping and response processing
+- 📝 Comprehensive logging for debugging
+- 💪 Full async/await support
 
 ## Quick Example
 
-Here’s how easy it is to define API endpoints with **Networking**:
+Here's how easy it is to define and use API endpoints with **Networking**:
 
 ```swift
 enum MyEndpoint {
@@ -54,24 +64,19 @@ extension MyEndpoint: Endpoint {
         }
     }
 }
+
+// Making requests
+let controller = NetworkingController<MyEndpoint, MyError>()
+
+do {
+    let user: User = try await controller.request(.getUser(userId: "123"))
+    // Handle the user data
+} catch {
+    // Handle MyError
+}
 ```
 
-That’s it! 💡 You’ve just made an API to work with. For more details, dive into the sections below.
-
----
-
-## Why Use Networking? 🛠️
-
-- **Organized API Definitions:** Define your endpoints with Swift enums for clarity and reusability.
-- **Environment Management:** Easily switch between live, test, and preview environments.
-- **Authentication (Optional):** Integrate your auth provider for secure API access and request mapping.
-- **JSON Mapping (Optional):** Pre-process responses before decoding to suit your app's needs.
-- **Error Handling:** Get meaningful errors to speed up debugging.
-- **Flexible Logging:** Adjust verbosity to your needs for better debugging.
-
----
-
-## Installation 🚀
+## Installation
 
 ### Swift Package Manager
 
@@ -85,120 +90,97 @@ Add **Networking** to your project via Swift Package Manager:
 
 3. Select your preferred version and finish.
 
----
+## Usage
 
-## Getting Started 🏁
+### Environment Management
 
-### 1. Define Your API Endpoints
-
-Use Swift enums to describe your API as seen in the example above ☝️
-
-### 2. Make a Network Request
-
-#### Using `NetworkingController`:
-
-This approach offers authentication handling, environment switching, and error management for you:
+Easily switch between different environments:
 
 ```swift
-let controller = NetworkingController<MyEndpoint, MyError>()
+// Configure with different environments
+let controller = NetworkingController<MyEndpoint, MyError>(
+    environment: .live    // For production
+    // or .test          // For unit testing
+    // or .preview       // For SwiftUI previews
+)
 
-do {
-    let response = try await controller.request(.getUser(userId: "123"))
-    // ...
-} catch {
-    // Handle `MyError`
-}
-```
-
-#### Using `URLRequest` Directly (Optional):
-
-For more control, construct a `URLRequest` yourself:
-
-```swift
-let userEndpoint = MyEndpoint.getUser(userId: "123")
-let urlRequest = URLRequest(userEndpoint)
-
-let _ = try await URLSession.shared.data(for: urlRequest)
-```
-
----
-
-## Key Features 🔑
-
-### Environment Switching
-
-Set up multiple environments (e.g., live, test, preview) effortlessly:
-
-```swift
-struct MyApiClient {
-  let controller = NetworkingController<MyEndpoint, MyError>(
-      environment: .live
-  )
-}
-```
-These environments integrate nicely with PointFree's [Dependencies](https://github.com/pointfreeco/swift-dependencies) package:
-```swift
+// Works great with PointFree's Dependencies package
 extension MyApiClient: DependencyKey {
-  static let liveValue = MyApiClient(environment: .live)
-  static let testValue = MyApiClient(environment: .test)
-  static let previewValue = MyApiClient(environment: .preview)
+    static let liveValue = MyApiClient(environment: .live)
+    static let testValue = MyApiClient(environment: .test)
+    static let previewValue = MyApiClient(environment: .preview)
 }
 ```
 
 ### Authentication
 
-Plug in your auth provider for seamless integration:
+Integrate your authentication provider:
 
 ```swift
+class MyAuthenticator: Authenticator {
+    var state: AuthenticationState { .reachable }
+    
+    func authenticate() async throws -> Bool {
+        // Your authentication logic
+        return true
+    }
+    
+    func mapRequest(_ request: inout URLRequest) {
+        // Add auth headers, tokens, etc.
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    }
+}
+
 let controller = NetworkingController<MyEndpoint, MyError>(
     authenticator: MyAuthenticator()
 )
 ```
-Using an authenticator, requests can be seamlessly configured to include general authentication headers, such as tokens or API keys.
+
+### JSON Mapping
+
+Transform API responses before decoding:
+
+```swift
+struct User: Decodable, JsonMapper {
+    let id: String
+    let name: String
+    
+    static func map(_ data: Data) -> Data {
+        // Transform response data if needed
+        return data
+    }
+}
+```
 
 ### Logging Control
 
-Enable or disable logging for specific endpoints:
+Configure logging per endpoint or globally:
 
 ```swift
+// Per endpoint
 extension MyEndpoint: Endpoint {
-  ...
-  var shouldPrintLogs: Bool {
-    switch self { ... }
-  }
+    var shouldPrintLogs: Bool {
+        switch self {
+        case .sensitiveData: false
+        default: true
+        }
+    }
 }
-```
-Alternatively, change the global configuration:
-```swift
+
+// Global configuration
 Networking.DebugConfiguration.shouldPrintLogs = true
 ```
 
----
+## Requirements
 
-## Requirements 📋
+- Swift 5.9 or later
+- Xcode 15.0 or later
+- iOS 13.0 / macOS 10.15 / tvOS 13.0 / watchOS 6.0 or later
 
-- **Swift**: 5.x or later  
-- **Xcode**: 15.x or later  
+## Contributing
 
----
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Contributing 🙌
+## License
 
-We’d love to see your ideas! 🧠 Whether it’s fixing bugs, improving documentation, or adding new features, your contributions are welcome.  
-
-### How to Contribute:
-1. Fork the repository and create your feature branch.  
-2. Write clean, maintainable code with unit tests.  
-3. Submit a pull request for review.  
-
-If you encounter an issue or have a feature request, feel free to open a GitHub issue!
-
----
-
-## License 📄
-
-**Networking** is licensed under the MIT License. See the [LICENSE](https://github.com/TelemTobi/Networking/blob/main/LICENSE.txt) for details.
-
----
-
-Happy coding with **Networking**! 🚀
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
