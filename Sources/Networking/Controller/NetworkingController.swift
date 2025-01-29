@@ -1,13 +1,13 @@
 import Foundation
 
 /// A networking controller for making requests with features like authentication, environment handling, json mapping and error handling.
-public final class NetworkingController<E: Endpoint, F: DecodableError> {
+public final class NetworkingController<E: Endpoint, F: DecodableError>: Sendable {
     
     /// The current environment, either `.live`, `.test`, or `.preview`.
-    public var environment: Networking.Environment = .live
+    public let environment: Networking.Environment
     
     /// An optional authentication provider to be used with the requests.
-    public var authenticator: Authenticator? = nil
+    public let authenticator: Authenticator?
     
     internal let urlSession: URLSession
     
