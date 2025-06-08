@@ -5,8 +5,8 @@ extension Error {
     }
     
     var asNetworkingError: Networking.Error {
-        if let fluxError = self as? Networking.Error {
-            return fluxError
+        if let networkingError = self as? Networking.Error {
+            return networkingError
         }
         
         if self is DecodingError {

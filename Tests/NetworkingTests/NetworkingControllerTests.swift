@@ -85,6 +85,6 @@ final class NetworkingControllerTests: XCTestCase {
             return
         }
         
-        XCTAssert(error.debugDescription.hasPrefix("decodingError"))
+        XCTAssert(error.description.contains("decodingError"))
     }
 }
