@@ -19,7 +19,7 @@ public enum Networking {
 
     
     /// An enum representing the various error types that can occur during network requests.
-    public enum Error: Swift.Error {
+    public enum Error: Swift.Error, Equatable {
         /// Indicates a connection issue (e.g., no internet).
         case connectionError
 
