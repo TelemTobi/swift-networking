@@ -5,13 +5,15 @@ extension NetworkingController {
         do {
             var urlRequest = try URLRequest(endpoint)
             
-            authenticator?.mapRequest(&urlRequest)
+            interceptor?.intercept(&urlRequest)
             
-            let (data, response) = try await urlSession.data(for: urlRequest)
+            var (data, response) = try await urlSession.data(for: urlRequest)
             
             #if DEBUG
             logRequest(endpoint, urlRequest, response, data)
             #endif
+            
+            interceptor?.intercept(&data)
             
             guard response.status.group == .success else {
                 throw(decodedError(endpoint, data))
@@ -28,7 +30,10 @@ extension NetworkingController {
             #if DEBUG
             logError(endpoint, error.asNetworkingError)
             #endif
-            throw(error as? F ?? .unknownError(error.description))
+            
+            let error: F = error as? F ?? .unknownError(error.description)
+            interceptor?.intercept(error)
+            throw(error)
         }
     }
     
@@ -44,13 +49,15 @@ extension NetworkingController {
     internal func makeMockRequest<T: Decodable>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
-            authenticator?.mapRequest(&urlRequest)
+            interceptor?.intercept(&urlRequest)
             
             if environment != .test {
                 try await Task.sleep(interval: Networking.DebugConfiguration.delayInterval)
             }
             
-            let sampleData = endpoint.sampleData ?? Data()
+            var sampleData = endpoint.sampleData ?? Data()
+            
+            interceptor?.intercept(&sampleData)
             
             logRequest(endpoint, urlRequest, nil, sampleData)
             
@@ -63,7 +70,10 @@ extension NetworkingController {
             
         } catch {
             logError(endpoint, error.asNetworkingError)
-            throw(F.init(error.asNetworkingError))
+            
+            let error = F.init(error.asNetworkingError)
+            interceptor?.intercept(error)
+            throw(error)
         }
     }
     #endif
@@ -72,13 +82,15 @@ extension NetworkingController {
         do {
             var urlRequest = try URLRequest(endpoint)
             
-            authenticator?.mapRequest(&urlRequest)
+            interceptor?.intercept(&urlRequest)
             
-            let (data, response) = try await urlSession.data(for: urlRequest)
+            var (data, response) = try await urlSession.data(for: urlRequest)
             
             #if DEBUG
             logRequest(endpoint, urlRequest, response, data)
             #endif
+
+            interceptor?.intercept(&data)
             
             guard response.status.group == .success else {
                 throw(decodedError(endpoint, data))
@@ -96,7 +108,10 @@ extension NetworkingController {
             #if DEBUG
             logError(endpoint, error.asNetworkingError)
             #endif
-            throw(error as? F ?? .unknownError(error.description))
+            
+            let error: F = error as? F ?? .unknownError(error.description)
+            interceptor?.intercept(error)
+            throw(error)
         }
     }
     
@@ -104,7 +119,7 @@ extension NetworkingController {
     internal func makeMockRequest<T: Decodable & JsonMapper>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
-            authenticator?.mapRequest(&urlRequest)
+            interceptor?.intercept(&urlRequest)
             
             if environment != .test {
                 try await Task.sleep(interval: Networking.DebugConfiguration.delayInterval)
@@ -125,7 +140,10 @@ extension NetworkingController {
             
         } catch {
             logError(endpoint, error.asNetworkingError)
-            throw(F.init(error.asNetworkingError))
+            
+            let error = F.init(error.asNetworkingError)
+            interceptor?.intercept(error)
+            throw(error)
         }
     }
     #endif

@@ -48,19 +48,20 @@ final class URLRequestTests: XCTestCase {
     func testEndpointTask() throws {
         // MARK: Empty task
         
+        let dateFormatter = ISO8601DateFormatter()
         var urlRequest = try URLRequest(testEndpoint)
         XCTAssertNil(urlRequest.httpBody)
-        XCTAssertNil(urlRequest.url?.query()?.components(separatedBy: "&"))
+        XCTAssertNil(urlRequest.url?.query?.components(separatedBy: "&"))
         
         // MARK: With body
         
-        let testBody = TestBody(someDate: .now, someCondition: false)
+        let testBody = TestBody(someDate: Date(), someCondition: false)
         testEndpoint.task = .encodableBody(testBody)
         urlRequest = try URLRequest(testEndpoint)
         
         XCTAssertEqual(
             try urlRequest.httpBody?.decodeIntoDictionary(),
-            ["some_date": testBody.someDate.ISO8601Format(), "some_condition": false]
+            ["some_date": dateFormatter.string(from: testBody.someDate), "some_condition": false]
         )
         
         // MARK: With query parameters
@@ -69,7 +70,7 @@ final class URLRequestTests: XCTestCase {
         urlRequest = try URLRequest(testEndpoint)
 
         XCTAssertEqual(
-            Set(urlRequest.url?.query()?.components(separatedBy: "&") ?? []),
+            Set(urlRequest.url?.query?.components(separatedBy: "&") ?? []),
             Set(["key1=1", "key2=2", "key3=true"])
         )
         
@@ -84,11 +85,11 @@ final class URLRequestTests: XCTestCase {
         
         XCTAssertEqual(
             try urlRequest.httpBody?.decodeIntoDictionary(),
-            ["some_date": testBody.someDate.ISO8601Format(), "some_condition": false]
+            ["some_date": dateFormatter.string(from: testBody.someDate), "some_condition": false]
         )
         
         XCTAssertEqual(
-            Set(urlRequest.url?.query()?.components(separatedBy: "&") ?? []),
+            Set(urlRequest.url?.query?.components(separatedBy: "&") ?? []),
             Set(["key1=1", "key2=2", "key3=true"])
         )
     }

@@ -1,17 +1,16 @@
 import Foundation
 @testable import Networking
 
-struct TestAuthenticator: Authenticator {
-    
-    var state: AuthenticationState
+struct TestInterceptor: Interceptor {
+    var authenticationState: AuthenticationState
     var authenticate: @Sendable () -> Bool
-    var mapRequest: @Sendable (inout URLRequest) -> Void
+    var intercept: @Sendable (inout URLRequest) -> Void
     
     func authenticate() async throws -> Bool {
         authenticate()
     }
     
-    func mapRequest(_ request: inout URLRequest) {
-        mapRequest(&request)
+    func intercept(_ request: inout URLRequest) {
+        intercept(&request)
     }
 }

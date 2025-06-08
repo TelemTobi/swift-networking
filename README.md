@@ -1,6 +1,6 @@
 # Swift Networking
 
-A Swift package that makes network requests easier and more maintainable in your iOS, macOS, and other Apple platform applications. It provides a type-safe, clean API with powerful features like environment switching, authentication handling, and JSON mapping.
+A Swift package that makes network requests easier and more maintainable in your iOS, macOS, and other Apple platform applications. It provides a type-safe, clean API with powerful features like environment switching, request interception, and JSON mapping.
 
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
 [![SPM](https://img.shields.io/badge/SPM-Compatible-brightgreen.svg)](https://swift.org/package-manager)
@@ -10,7 +10,7 @@ A Swift package that makes network requests easier and more maintainable in your
 
 - ✨ Type-safe API endpoints using Swift enums
 - 🌍 Built-in environment switching (live, test, preview)
-- 🔒 Optional authentication handling
+- 🔒 Powerful request & response interception
 - 🗺️ Flexible JSON mapping and response processing
 - 📝 Comprehensive logging for debugging
 - 💪 Full async/await support
@@ -112,27 +112,37 @@ extension MyApiClient: DependencyKey {
 }
 ```
 
-### Authentication
+### Request Interception
 
-Integrate your authentication provider:
+Integrate your request interceptor to handle authentication, modify requests/responses, and process errors:
 
 ```swift
-class MyAuthenticator: Authenticator {
-    var state: AuthenticationState { .reachable }
+class MyInterceptor: Interceptor {
+    var authenticationState: AuthenticationState { .reachable }
     
     func authenticate() async throws -> Bool {
         // Your authentication logic
         return true
     }
     
-    func mapRequest(_ request: inout URLRequest) {
-        // Add auth headers, tokens, etc.
+    func intercept(_ request: inout URLRequest) {
+        // Add headers, tokens, etc.
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    }
+    
+    func intercept(_ data: inout Data) {
+        // Process response data before decoding
+        // Example: decrypt data, modify response format
+    }
+    
+    func intercept(_ error: DecodableError) {
+        // Handle or process errors
+        // Example: refresh token on 401, log errors
     }
 }
 
 let controller = NetworkingController<MyEndpoint, MyError>(
-    authenticator: MyAuthenticator()
+    interceptor: MyInterceptor()
 )
 ```
 

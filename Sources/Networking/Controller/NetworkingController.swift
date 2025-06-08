@@ -1,13 +1,19 @@
 import Foundation
 
-/// A networking controller for making requests with features like authentication, environment handling, json mapping and error handling.
-open class NetworkingController<E: Endpoint, F: DecodableError> {
+/// A networking controller for making requests with features like request interception, environment handling, json mapping and error handling.
+public class NetworkingController<E: Endpoint, F: DecodableError> {
     
     /// The current environment, either `.live`, `.test`, or `.preview`.
     public let environment: Networking.Environment
     
-    /// An optional authentication provider to be used with the requests.
-    public let authenticator: Authenticator?
+    /// An optional interceptor to be used with the requests.
+    /// 
+    /// The interceptor can:
+    /// - Handle authentication state and token management
+    /// - Modify requests before they are sent (add headers, parameters)
+    /// - Process response data before decoding
+    /// - Handle errors before they are thrown
+    public let interceptor: Interceptor?
     
     internal let urlSession: URLSession
     
@@ -15,11 +21,11 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
     internal let loggingQueue = DispatchQueue(label: #function)
     #endif
     
-    /// A networking controller for making requests with features like authentication, environment handling, and error handling.
+    /// A networking controller for making requests with features like request interception, environment handling, and error handling.
     ///
     /// - Parameters:
     ///   - environment: The current environment, either `.live`, `.test`, or `.preview`.
-    ///   - authenticator: An optional authentication provider to be used with the requests.
+    ///   - interceptor: An optional interceptor to be used with the requests.
     ///   - configuration: A configuration object that specifies certain behaviors, such as caching policies, timeouts, proxies, pipelining, TLS versions to support, cookie policies, and credential storage.
     ///   - delegate: A session delegate object that handles requests for authentication and other session-related events.
     ///
@@ -28,12 +34,16 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
     ///   * **.test:** Does not make a network call. This environment is intended for unit testing your code that interacts with the API.
     ///   * **.preview:** Does not make a network call. This environment is used with SwiftUI previews to provide sample data without actual network requests.
     ///
-    /// * **Authentication:**
-    ///   * The controller checks the authentication state through the `authenticator` (if provided).
-    ///     If authentication is required and fails, a `.failure(.authenticationError)` result is returned.
-    public init(environment: Networking.Environment = .live, authenticator: Authenticator? = nil, configuration: URLSessionConfiguration = .default, delegate: URLSessionDelegate? = nil) {
+    /// * **Interception:**
+    ///   * The controller uses the interceptor (if provided) to:
+    ///     * Check authentication state
+    ///     * Perform authentication if needed
+    ///     * Modify requests before sending
+    ///     * Process response data
+    ///     * Handle errors
+    public init(environment: Networking.Environment = .live, interceptor: Interceptor? = nil, configuration: URLSessionConfiguration = .default, delegate: URLSessionDelegate? = nil) {
         self.environment = environment
-        self.authenticator = authenticator
+        self.interceptor = interceptor
         
         self.urlSession = URLSession(
             configuration: configuration,
@@ -47,14 +57,14 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
     /// - Throws: An error of type `F` if the request fails due to an issue like authentication, connection, or decoding errors.
     /// - Returns: The decoded response model of type `T`.
-    open func request<T: Decodable & Sendable>(_ endpoint: E) async throws(F) -> T {
+    public func request<T: Decodable & Sendable>(_ endpoint: E) async throws(F) -> T {
         #if DEBUG
         guard environment == .live, !endpoint.shouldUseSampleData else {
             return try await makeMockRequest(endpoint)
         }
         #endif
 
-        switch authenticator?.state ?? .reachable {
+        switch interceptor?.authenticationState ?? .reachable {
         case .notReachable:
             throw(.connectionError)
         case .notLoggedIn:
@@ -64,7 +74,7 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
         }
 
         do {
-            if try await authenticator?.authenticate() == false {
+            if try await interceptor?.authenticate() == false {
                 throw(F.authenticationError)
             }
         } catch {
@@ -79,7 +89,7 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
     /// - Returns: An asynchronous result of type `Result<T, F>`.
     ///     On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
-    open func request<T: Decodable & Sendable>(_ endpoint: E) async -> Result<T, F> {
+    public func request<T: Decodable & Sendable>(_ endpoint: E) async -> Result<T, F> {
         do {
             let result: T = try await request(endpoint)
             return .success(result)
@@ -96,7 +106,7 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
     ///   - completion: A closure that will be called asynchronously with the result of the network request.
     ///   The closure takes a single argument of type `Result<T, F>`.
     ///   On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F` describing the issue.
-    open func request<T: Decodable & Sendable>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
+    public func request<T: Decodable & Sendable>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
         Task {
             do {
                 let result: T = try await request(endpoint)
@@ -122,14 +132,14 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
     /// - Throws: An error of type `F` if the request fails due to issues like authentication, connection, or decoding errors.
     /// - Returns: The decoded response model of type `T`.
-    open func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E) async throws(F) -> T {
+    public func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E) async throws(F) -> T {
         #if DEBUG
         guard environment == .live, !endpoint.shouldUseSampleData else {
             return try await makeMockRequest(endpoint)
         }
         #endif
         
-        switch authenticator?.state ?? .reachable {
+        switch interceptor?.authenticationState ?? .reachable {
         case .notReachable:
             throw(.connectionError)
         case .notLoggedIn:
@@ -139,7 +149,7 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
         }
         
         do {
-            if try await authenticator?.authenticate() == false {
+            if try await interceptor?.authenticate() == false {
                 throw(F.authenticationError)
             }
         } catch {
@@ -162,7 +172,7 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
     /// - Parameter endpoint: The `Endpoint` object defining the API endpoint and request parameters.
     /// - Returns: An asynchronous `Result<T, F>`. On success, it contains the decoded model of type `T`.
     ///   On failure, it contains an error of type `F` describing the issue.
-    open func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E) async -> Result<T, F> {
+    public func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E) async -> Result<T, F> {
         do {
             let result: T = try await request(endpoint)
             return .success(result)
@@ -187,7 +197,7 @@ open class NetworkingController<E: Endpoint, F: DecodableError> {
     ///   - completion: A closure that is called asynchronously with the result of the network request.
     ///     The closure takes a single argument of type `Result<T, F>`.
     ///     On success, the result contains the decoded model of type `T`. On failure, it contains an error of type `F`.
-    open func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
+    public func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E, completion: @escaping (Result<T, F>) -> Void) {
         Task {
             do {
                 let result: T = try await request(endpoint)
