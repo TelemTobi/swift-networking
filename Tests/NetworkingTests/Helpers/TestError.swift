@@ -2,10 +2,9 @@ import Foundation
 @testable import Networking
 
 struct TestError: DecodableError, Equatable {
-    
-    var debugDescription: String
+    var type: Networking.Error
     
     init(_ type: Networking.Error) {
-        self.debugDescription = type.debugDescription
+        self.type = type
     }
 }

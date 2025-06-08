@@ -2,6 +2,7 @@ import Foundation
 
 /// A protocol defining a custom error type that can be decoded from the API response.
 public protocol DecodableError: Error, Decodable {
+    var type: Networking.Error { get }
     /// Creates a new instance of the error from a `Networking.Error` type.
     init(_ type: Networking.Error)
 }

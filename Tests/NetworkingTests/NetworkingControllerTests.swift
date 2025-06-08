@@ -15,10 +15,10 @@ final class NetworkingControllerTests: XCTestCase {
         sampleData: sampleData(fileName: "SampleResponse")
     )
     
-    var testAuthenticator = TestAuthenticator(
-        state: .notReachable,
+    var testInterceptor = TestInterceptor(
+        authenticationState: .notReachable,
         authenticate: { false },
-        mapRequest: { _ in }
+        intercept: { _ in }
     )
     
     fileprivate static func sampleData(fileName: String) -> Data {
@@ -34,10 +34,10 @@ final class NetworkingControllerTests: XCTestCase {
         }
     }
 
-    func testAuthentication() async {
-        let controller = NetworkingController<TestEndpoint, TestError>(
+    func testInterceptor() async {
+        var controller = NetworkingController<TestEndpoint, TestError>(
             environment: .live,
-            authenticator: testAuthenticator
+            interceptor: testInterceptor
         )
         
         var result: Result<TestResponse, TestError>
@@ -47,14 +47,15 @@ final class NetworkingControllerTests: XCTestCase {
         XCTAssertEqual(result, .failure(.connectionError))
         
         // Authentication error
-        testAuthenticator.state = .notLoggedIn
-        controller.authenticator = testAuthenticator
+        testInterceptor.authenticationState = .notLoggedIn
+        controller = .init(environment: .live, interceptor: testInterceptor)
         
         result = await controller.request(testEndpoint)
         XCTAssertEqual(result, .failure(.authenticationError))
-        
-        testAuthenticator.state = .reachable
-        controller.authenticator = testAuthenticator
+
+        // Reachable
+        testInterceptor.authenticationState = .reachable
+        controller = .init(environment: .live, interceptor: testInterceptor)
         
         result = await controller.request(testEndpoint)
         XCTAssertEqual(result, .failure(.connectionError))
@@ -63,7 +64,7 @@ final class NetworkingControllerTests: XCTestCase {
     func testRequest() async {
         let controller = NetworkingController<TestEndpoint, TestError>(
             environment: .test,
-            authenticator: testAuthenticator
+            interceptor: testInterceptor
         )
         
         var result: Result<TestResponse, TestError>
@@ -84,6 +85,6 @@ final class NetworkingControllerTests: XCTestCase {
             return
         }
         
-        XCTAssert(error.debugDescription.hasPrefix("decodingError"))
+        XCTAssert(error.description.contains("decodingError"))
     }
 }
