@@ -40,7 +40,10 @@ public extension NetworkingController {
         loggingQueue.async {
             var endpointName = String(describing: endpoint)
                 .components(separatedBy: "(").first ?? String(describing: endpoint)
+            
+            #if DEBUG
             endpointName.append(endpoint.shouldUseSampleData ? " (Mock)" : "")
+            #endif
             
             print()
             print("⚠️ Error - \(endpointName)")
