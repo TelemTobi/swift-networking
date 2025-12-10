@@ -1,8 +1,6 @@
 import Foundation
 
 public extension NetworkingController {
-    
-    #if DEBUG
     func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse?, _ data: Data) {
         guard endpoint.shouldPrintLogs else { return }
         
@@ -49,5 +47,4 @@ public extension NetworkingController {
             print(error.debugDescription)
         }
     }
-    #endif
 }

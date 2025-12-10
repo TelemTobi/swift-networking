@@ -57,17 +57,6 @@ public protocol Endpoint: Sendable {
     /// (Default: `.deferredToDate`)
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy { get }
 
-    #if DEBUG
-    /// A Boolean value that indicates whether the endpoint should use sample data instead of making a real network request.
-    ///
-    /// When set to `true`, the `sampleData` property will be used to simulate the network response, allowing you to test the endpoint without relying on an actual network connection.
-    var shouldUseSampleData: Bool { get }
-    
-    /// Optional sample data used for testing or mocking purposes.
-    ///
-    /// This property allows you to provide pre-defined data to simulate a network response in tests.
-    var sampleData: Data? { get }
-    
     /// A Boolean value indicating whether request and response details should be printed to the console.
     ///
     /// When set to `true`, The following information will be logged upon receiving a response:
@@ -83,6 +72,17 @@ public protocol Endpoint: Sendable {
     ///
     /// (Default: `true`)
     var shouldPrintLogs: Bool { get }
+    
+    #if DEBUG
+    /// A Boolean value that indicates whether the endpoint should use sample data instead of making a real network request.
+    ///
+    /// When set to `true`, the `sampleData` property will be used to simulate the network response, allowing you to test the endpoint without relying on an actual network connection.
+    var shouldUseSampleData: Bool { get }
+    
+    /// Optional sample data used for testing or mocking purposes.
+    ///
+    /// This property allows you to provide pre-defined data to simulate a network response in tests.
+    var sampleData: Data? { get }
     #endif
 }
 
@@ -99,11 +99,11 @@ public extension Endpoint {
     
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy { .deferredToDate }
 
+    var shouldPrintLogs: Bool { Networking.DebugConfiguration.shouldPrintLogs }
+    
     #if DEBUG
     var shouldUseSampleData: Bool { false }
     
     var sampleData: Data? { nil }
-    
-    var shouldPrintLogs: Bool { Networking.DebugConfiguration.shouldPrintLogs }
     #endif
 }

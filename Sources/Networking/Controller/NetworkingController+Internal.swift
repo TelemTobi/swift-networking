@@ -9,9 +9,7 @@ extension NetworkingController {
             
             var (data, response) = try await urlSession.data(for: urlRequest)
             
-            #if DEBUG
             logRequest(endpoint, urlRequest, response, data)
-            #endif
             
             interceptor?.intercept(&data)
             
@@ -27,9 +25,7 @@ extension NetworkingController {
             return model
             
         } catch {
-            #if DEBUG
             logError(endpoint, error.asNetworkingError)
-            #endif
             
             let error: F = error as? F ?? .unknownError(error.description)
             interceptor?.intercept(error)
@@ -86,9 +82,7 @@ extension NetworkingController {
             
             var (data, response) = try await urlSession.data(for: urlRequest)
             
-            #if DEBUG
             logRequest(endpoint, urlRequest, response, data)
-            #endif
 
             interceptor?.intercept(&data)
             
@@ -105,9 +99,7 @@ extension NetworkingController {
             return model
             
         } catch {
-            #if DEBUG
             logError(endpoint, error.asNetworkingError)
-            #endif
             
             let error: F = error as? F ?? .unknownError(error.description)
             interceptor?.intercept(error)
