@@ -1,8 +1,6 @@
 import Foundation
 
 public extension NetworkingController {
-    
-    #if DEBUG
     func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse?, _ data: Data) {
         guard endpoint.shouldPrintLogs else { return }
         
@@ -42,12 +40,14 @@ public extension NetworkingController {
         loggingQueue.async {
             var endpointName = String(describing: endpoint)
                 .components(separatedBy: "(").first ?? String(describing: endpoint)
+            
+            #if DEBUG
             endpointName.append(endpoint.shouldUseSampleData ? " (Mock)" : "")
+            #endif
             
             print()
             print("⚠️ Error - \(endpointName)")
             print(error.debugDescription)
         }
     }
-    #endif
 }

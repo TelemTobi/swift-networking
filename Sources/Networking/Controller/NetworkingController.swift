@@ -17,9 +17,7 @@ public final class NetworkingController<E: Endpoint, F: DecodableError>: Sendabl
     
     internal let urlSession: URLSession
     
-    #if DEBUG
     internal let loggingQueue = DispatchQueue(label: #function)
-    #endif
     
     /// A networking controller for making requests with features like request interception, environment handling, and error handling.
     ///
