@@ -1,7 +1,7 @@
 import Foundation
 
 extension NetworkingController {
-    internal func makeRequest<T: Decodable & Sendable>(_ endpoint: Endpoint) async throws(F) -> T {
+    internal func makeRequest<T: Decodable & Sendable>(_ endpoint: Endpoint, attempt: Int = .zero) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
             
@@ -25,7 +25,13 @@ extension NetworkingController {
             return model
             
         } catch {
-            logError(endpoint, error.asNetworkingError)
+            logError(endpoint, error.asNetworkingError, attempt)
+            
+            if attempt < endpoint.retryCount {
+                let backoffDuration = 0.25 * Double(attempt + 1)
+                try? await Task.sleep(interval: backoffDuration)
+                return try await makeRequest(endpoint, attempt: attempt + 1)
+            }
             
             let error: F = error as? F ?? .unknownError(error.description)
             interceptor?.intercept(error)
@@ -74,7 +80,7 @@ extension NetworkingController {
     }
     #endif
     
-    internal func makeRequest<T: Decodable & Sendable & JsonMapper>(_ endpoint: Endpoint) async throws(F) -> T {
+    internal func makeRequest<T: Decodable & Sendable & JsonMapper>(_ endpoint: Endpoint, attempt: Int = .zero) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
             
@@ -99,7 +105,13 @@ extension NetworkingController {
             return model
             
         } catch {
-            logError(endpoint, error.asNetworkingError)
+            logError(endpoint, error.asNetworkingError, attempt)
+            
+            if attempt < endpoint.retryCount {
+                let backoffDuration = 0.25 * Double(attempt + 1)
+                try? await Task.sleep(interval: backoffDuration)
+                return try await makeRequest(endpoint, attempt: attempt + 1)
+            }
             
             let error: F = error as? F ?? .unknownError(error.description)
             interceptor?.intercept(error)

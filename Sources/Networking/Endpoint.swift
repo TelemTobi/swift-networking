@@ -57,6 +57,15 @@ public protocol Endpoint: Sendable {
     /// (Default: `.deferredToDate`)
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy { get }
 
+    /// The number of times a failed request should be retried.
+    ///
+    /// Retries are attempted for any thrown error (network, decoding, or interceptor-related) and
+    /// use a linear backoff that waits `0.25s * (attemptIndex + 1)` before each retry. The initial
+    /// request counts separately, so a value of `3` results in up to four total attempts.
+    ///
+    /// (Default: `.zero`)
+    var retryCount: Int { get }
+    
     /// A Boolean value indicating whether request and response details should be printed to the console.
     ///
     /// When set to `true`, The following information will be logged upon receiving a response:
@@ -99,6 +108,8 @@ public extension Endpoint {
     
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy { .deferredToDate }
 
+    var retryCount: Int { .zero }
+    
     var shouldPrintLogs: Bool { Networking.DebugConfiguration.shouldPrintLogs }
     
     #if DEBUG

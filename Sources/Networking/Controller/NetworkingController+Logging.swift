@@ -34,7 +34,7 @@ public extension NetworkingController {
         }
     }
     
-    func logError(_ endpoint: Endpoint, _ error: Networking.Error) {
+    func logError(_ endpoint: Endpoint, _ error: Networking.Error, _ attempt: Int = .zero) {
         guard endpoint.shouldPrintLogs else { return }
         
         loggingQueue.async {
@@ -44,6 +44,11 @@ public extension NetworkingController {
             #if DEBUG
             endpointName.append(endpoint.shouldUseSampleData ? " (Mock)" : "")
             #endif
+            
+            if endpoint.retryCount > .zero {
+                let totalAttempts = endpoint.retryCount + 1
+                endpointName.append(" (Attempt \(attempt + 1) of \(totalAttempts))")
+            }
             
             print()
             print("⚠️ Error - \(endpointName)")
