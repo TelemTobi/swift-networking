@@ -12,7 +12,7 @@ A Swift package that makes network requests easier and more maintainable in your
 - 🌍 Built-in environment switching (live, test, preview)
 - 🔒 Powerful request & response interception
 - 🗺️ Flexible JSON mapping and response processing
-- 🔁 Configurable retry handling with backoff (opt-in per endpoint)
+- 🔁 Retry handling with backoff (opt-in per endpoint)
 - 📝 Comprehensive logging for debugging
 - 💪 Full async/await support
 
