@@ -10,8 +10,10 @@ struct TestEndpoint: Endpoint {
     var keyEncodingStrategy: JSONEncoder.KeyEncodingStrategy
     var dateEncodingStrategy: JSONEncoder.DateEncodingStrategy
     var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
+    var retryCount: Int = .zero
     
     #if DEBUG
+    var shouldUseSampleData: Bool = false
     var sampleData: Data?
     #endif
 }

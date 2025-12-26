@@ -1,13 +1,18 @@
 import Foundation
 
 public extension NetworkingController {
-    func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse?, _ data: Data) {
+    func logRequest(_ endpoint: Endpoint, _ request: URLRequest, _ response: URLResponse?, _ data: Data, _ attempt: Int = .zero) {
         guard endpoint.shouldPrintLogs else { return }
         
         loggingQueue.async {
             var endpointName = String(describing: endpoint)
                 .components(separatedBy: "(").first ?? String(describing: endpoint)
             endpointName.append(response == nil ? " (Mock)" : "")
+            
+            if attempt > .zero {
+                let totalAttempts = endpoint.retryCount + 1
+                endpointName.append(" (Attempt \(attempt + 1) of \(totalAttempts))")
+            }
             
             let statusCode = response?.status ?? .ok
             
@@ -34,7 +39,7 @@ public extension NetworkingController {
         }
     }
     
-    func logError(_ endpoint: Endpoint, _ error: Networking.Error) {
+    func logError(_ endpoint: Endpoint, _ error: Networking.Error, _ attempt: Int = .zero) {
         guard endpoint.shouldPrintLogs else { return }
         
         loggingQueue.async {
@@ -44,6 +49,11 @@ public extension NetworkingController {
             #if DEBUG
             endpointName.append(endpoint.shouldUseSampleData ? " (Mock)" : "")
             #endif
+            
+            if endpoint.retryCount > .zero {
+                let totalAttempts = endpoint.retryCount + 1
+                endpointName.append(" (Attempt \(attempt + 1) of \(totalAttempts))")
+            }
             
             print()
             print("⚠️ Error - \(endpointName)")
