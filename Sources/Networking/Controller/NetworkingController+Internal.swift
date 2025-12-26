@@ -9,7 +9,7 @@ extension NetworkingController {
             
             var (data, response) = try await urlSession.data(for: urlRequest)
             
-            logRequest(endpoint, urlRequest, response, data)
+            logRequest(endpoint, urlRequest, response, data, attempt)
             
             interceptor?.intercept(&data)
             
@@ -88,7 +88,7 @@ extension NetworkingController {
             
             var (data, response) = try await urlSession.data(for: urlRequest)
             
-            logRequest(endpoint, urlRequest, response, data)
+            logRequest(endpoint, urlRequest, response, data, attempt)
 
             interceptor?.intercept(&data)
             
