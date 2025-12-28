@@ -28,7 +28,7 @@ extension NetworkingController {
             logError(endpoint, error.asNetworkingError, attempt)
             
             if attempt < endpoint.retryCount {
-                let backoffDuration = 0.25 * Double(attempt + 1)
+                let backoffDuration = 0.2 * pow(2, Double(attempt))
                 try? await Task.sleep(interval: backoffDuration)
                 return try await makeRequest(endpoint, attempt: attempt + 1)
             }
@@ -108,7 +108,7 @@ extension NetworkingController {
             logError(endpoint, error.asNetworkingError, attempt)
             
             if attempt < endpoint.retryCount {
-                let backoffDuration = 0.25 * Double(attempt + 1)
+                let backoffDuration = 0.2 * pow(2, Double(attempt))
                 try? await Task.sleep(interval: backoffDuration)
                 return try await makeRequest(endpoint, attempt: attempt + 1)
             }

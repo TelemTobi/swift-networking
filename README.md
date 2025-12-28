@@ -12,7 +12,7 @@ A Swift package that makes network requests easier and more maintainable in your
 - 🌍 Built-in environment switching (live, test, preview)
 - 🔒 Powerful request & response interception
 - 🗺️ Flexible JSON mapping and response processing
-- 🔁 Retry handling with backoff (opt-in per endpoint)
+- 🔁 Retry handling with exponential backoff (opt-in per endpoint)
 - 📝 Comprehensive logging for debugging
 - 💪 Full async/await support
 
@@ -163,6 +163,22 @@ struct User: Decodable, JsonMapper {
 }
 ```
 
+### Retry Handling
+
+Control how many times a request should be retried after a failure. Retries apply to any thrown error (network, decoding, or interceptor-related) and use an exponential backoff that starts at `0.2s` and doubles with each retry. The initial request counts separately, so `retryCount` represents additional attempts (`retryCount = 2` -> up to 3 total attempts).
+
+```swift
+extension MyEndpoint: Endpoint {
+    var retryCount: Int {
+        switch self {
+        case .getUser: 2   // Allow two retries (3 attempts total)
+        case .updateProfile: 0   // No retries
+        case .createPost: 1   // One retry (2 attempts total)
+        }
+    }
+}
+```
+
 ### Logging Control
 
 Configure logging per endpoint or globally:
@@ -180,25 +196,6 @@ extension MyEndpoint: Endpoint {
 
 // Global configuration
 Networking.DebugConfiguration.shouldPrintLogs = true
-```
-
-### Retry Handling
-
-Control how many times a request should be retried after a failure. Retries apply to any thrown error (network, decoding, or interceptor-related) and use a linear backoff of `0.25s * (attemptIndex + 1)` between attempts. The initial request counts separately, so `retryCount` represents additional attempts (`retryCount = 2` -> up to 3 total attempts).
-
-```swift
-extension MyEndpoint: Endpoint {
-    var retryCount: Int {
-        switch self {
-        case .getUser:
-            return 2   // Allow two retries (3 attempts total)
-        case .updateProfile:
-            return 0   // No retries
-        case .createPost:
-            return 1   // One retry (2 attempts total)
-        }
-    }
-}
 ```
 
 ## Requirements
