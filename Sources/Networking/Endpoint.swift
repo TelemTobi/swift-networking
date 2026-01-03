@@ -60,8 +60,9 @@ public protocol Endpoint: Sendable {
     /// The number of times a failed request should be retried.
     ///
     /// Retries are attempted for any thrown error (network, decoding, or interceptor-related) and
-    /// use a linear backoff that waits `0.25s * (attemptIndex + 1)` before each retry. The initial
-    /// request counts separately, so a value of `3` results in up to four total attempts.
+    /// use exponential backoff. The delay starts at `0.2s` and doubles for each subsequent retry
+    /// attempt. The initial request counts separately, so a value of `3` results in up to four total
+    /// attempts.
     ///
     /// (Default: `.zero`)
     var retryCount: Int { get }
