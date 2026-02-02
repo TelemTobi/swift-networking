@@ -47,7 +47,6 @@ extension NetworkingController {
         return error ?? .unknownError()
     }
     
-    #if DEBUG
     internal func makeMockRequest<T: Decodable>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
@@ -78,7 +77,6 @@ extension NetworkingController {
             throw(error)
         }
     }
-    #endif
     
     internal func makeRequest<T: Decodable & Sendable & JsonMapper>(_ endpoint: Endpoint, attempt: Int = .zero) async throws(F) -> T {
         do {
@@ -119,7 +117,6 @@ extension NetworkingController {
         }
     }
     
-    #if DEBUG
     internal func makeMockRequest<T: Decodable & JsonMapper>(_ endpoint: Endpoint) async throws(F) -> T {
         do {
             var urlRequest = try URLRequest(endpoint)
@@ -150,5 +147,4 @@ extension NetworkingController {
             throw(error)
         }
     }
-    #endif
 }

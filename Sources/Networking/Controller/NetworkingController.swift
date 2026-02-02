@@ -56,11 +56,9 @@ public final class NetworkingController<E: Endpoint, F: DecodableError>: Sendabl
     /// - Throws: An error of type `F` if the request fails due to an issue like authentication, connection, or decoding errors.
     /// - Returns: The decoded response model of type `T`.
     public func request<T: Decodable & Sendable>(_ endpoint: E) async throws(F) -> T {
-        #if DEBUG
         guard environment == .live, !endpoint.shouldUseSampleData else {
             return try await makeMockRequest(endpoint)
         }
-        #endif
 
         switch interceptor?.authenticationState ?? .reachable {
         case .notReachable:
@@ -131,11 +129,9 @@ public final class NetworkingController<E: Endpoint, F: DecodableError>: Sendabl
     /// - Throws: An error of type `F` if the request fails due to issues like authentication, connection, or decoding errors.
     /// - Returns: The decoded response model of type `T`.
     public func request<T: Decodable & Sendable & JsonMapper>(_ endpoint: E) async throws(F) -> T {
-        #if DEBUG
         guard environment == .live, !endpoint.shouldUseSampleData else {
             return try await makeMockRequest(endpoint)
         }
-        #endif
         
         switch interceptor?.authenticationState ?? .reachable {
         case .notReachable:
