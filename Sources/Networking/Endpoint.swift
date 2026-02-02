@@ -83,7 +83,6 @@ public protocol Endpoint: Sendable {
     /// (Default: `true`)
     var shouldPrintLogs: Bool { get }
     
-    #if DEBUG
     /// A Boolean value that indicates whether the endpoint should use sample data instead of making a real network request.
     ///
     /// When set to `true`, the `sampleData` property will be used to simulate the network response, allowing you to test the endpoint without relying on an actual network connection.
@@ -93,7 +92,6 @@ public protocol Endpoint: Sendable {
     ///
     /// This property allows you to provide pre-defined data to simulate a network response in tests.
     var sampleData: Data? { get }
-    #endif
 }
 
 // Default implementations for optional properties
@@ -113,9 +111,7 @@ public extension Endpoint {
     
     var shouldPrintLogs: Bool { Networking.DebugConfiguration.shouldPrintLogs }
     
-    #if DEBUG
     var shouldUseSampleData: Bool { false }
     
     var sampleData: Data? { nil }
-    #endif
 }

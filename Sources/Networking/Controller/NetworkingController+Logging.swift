@@ -46,9 +46,7 @@ public extension NetworkingController {
             var endpointName = String(describing: endpoint)
                 .components(separatedBy: "(").first ?? String(describing: endpoint)
             
-            #if DEBUG
             endpointName.append(endpoint.shouldUseSampleData ? " (Mock)" : "")
-            #endif
             
             if endpoint.retryCount > .zero {
                 let totalAttempts = endpoint.retryCount + 1

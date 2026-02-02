@@ -12,8 +12,6 @@ struct TestEndpoint: Endpoint {
     var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy
     var retryCount: Int = .zero
     
-    #if DEBUG
     var shouldUseSampleData: Bool = false
     var sampleData: Data?
-    #endif
 }
