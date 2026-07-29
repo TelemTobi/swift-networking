@@ -22,10 +22,11 @@ public final class NetworkingController<E: Endpoint, F: DecodableError>: Sendabl
     /// A networking controller for making requests with features like request interception, environment handling, and error handling.
     ///
     /// - Parameters:
+    ///   - urlSession: The `URLSession` used to perform the requests. Defaults to `URLSession.shared`.
+    ///   Provide your own session to control caching policies, timeouts, proxies, TLS versions, cookie policies,
+    ///   credential storage, or to supply a session delegate.
     ///   - environment: The current environment, either `.live`, `.test`, or `.preview`.
     ///   - interceptor: An optional interceptor to be used with the requests.
-    ///   - configuration: A configuration object that specifies certain behaviors, such as caching policies, timeouts, proxies, pipelining, TLS versions to support, cookie policies, and credential storage.
-    ///   - delegate: A session delegate object that handles requests for authentication and other session-related events.
     ///
     /// * **Environment:**
     ///   * **.live:** Makes a real network call to the production API endpoint.
@@ -39,15 +40,10 @@ public final class NetworkingController<E: Endpoint, F: DecodableError>: Sendabl
     ///     * Modify requests before sending
     ///     * Process response data
     ///     * Handle errors
-    public init(environment: Networking.Environment = .live, interceptor: Interceptor? = nil, configuration: URLSessionConfiguration = .default, delegate: URLSessionDelegate? = nil) {
+    public init(urlSession: URLSession = .shared, environment: Networking.Environment = .live, interceptor: Interceptor? = nil) {
+        self.urlSession = urlSession
         self.environment = environment
         self.interceptor = interceptor
-        
-        self.urlSession = URLSession(
-            configuration: configuration,
-            delegate: delegate,
-            delegateQueue: nil
-        )
     }
     
     /// Performs a network request using the provided `Endpoint`.

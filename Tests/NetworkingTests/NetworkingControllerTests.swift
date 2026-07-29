@@ -21,10 +21,10 @@ final class NetworkingControllerTests: XCTestCase {
         intercept: { _ in }
     )
     
-    private func makeEphemeralSessionConfiguration() -> URLSessionConfiguration {
+    private func makeEphemeralSession() -> URLSession {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [MockURLProtocol.self]
-        return configuration
+        return URLSession(configuration: configuration)
     }
     
     fileprivate static func sampleData(fileName: String) -> Data {
@@ -122,13 +122,13 @@ final class NetworkingControllerTests: XCTestCase {
         endpoint.retryCount = 1
         
         let controller = NetworkingController<TestEndpoint, TestError>(
+            urlSession: makeEphemeralSession(),
             environment: .live,
             interceptor: TestInterceptor(
                 authenticationState: .reachable,
                 authenticate: { true },
                 intercept: { _ in }
-            ),
-            configuration: makeEphemeralSessionConfiguration()
+            )
         )
         
         let result: Result<TestResponse, TestError> = await controller.request(endpoint)
@@ -152,13 +152,13 @@ final class NetworkingControllerTests: XCTestCase {
         endpoint.retryCount = 2
         
         let controller = NetworkingController<TestEndpoint, TestError>(
+            urlSession: makeEphemeralSession(),
             environment: .live,
             interceptor: TestInterceptor(
                 authenticationState: .reachable,
                 authenticate: { true },
                 intercept: { _ in }
-            ),
-            configuration: makeEphemeralSessionConfiguration()
+            )
         )
         
         let result: Result<TestResponse, TestError> = await controller.request(endpoint)

@@ -13,6 +13,7 @@ A Swift package that makes network requests easier and more maintainable in your
 - 🔒 Powerful request & response interception
 - 🗺️ Flexible JSON mapping and response processing
 - 🔁 Retry handling with exponential backoff (opt-in per endpoint)
+- 🔧 Bring your own `URLSession` for custom configuration, delegates, or mocking
 - 📝 Comprehensive logging for debugging
 - 💪 Full async/await support
 
@@ -111,6 +112,42 @@ extension MyApiClient: DependencyKey {
     static let testValue = MyApiClient(environment: .test)
     static let previewValue = MyApiClient(environment: .preview)
 }
+```
+
+### Custom URLSession
+
+By default the controller uses `URLSession.shared`. Pass your own session to control caching, timeouts, proxies, cookie policies, credential storage, or to attach a session delegate:
+
+```swift
+let configuration = URLSessionConfiguration.default
+configuration.timeoutIntervalForRequest = 30
+configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+
+let controller = NetworkingController<MyEndpoint, MyError>(
+    urlSession: URLSession(configuration: configuration)
+)
+
+// Or with a session delegate, for certificate pinning, metrics, etc.
+let controller = NetworkingController<MyEndpoint, MyError>(
+    urlSession: URLSession(
+        configuration: .default,
+        delegate: MySessionDelegate(),
+        delegateQueue: nil
+    )
+)
+```
+
+> The controller does not own the session it is given — it never calls `invalidateAndCancel()` or `finishTasksAndInvalidate()`. If you create a session with a delegate, you are responsible for invalidating it when you're done, otherwise the session retains its delegate.
+
+Since the session is injectable, you can also swap in a `URLProtocol`-based mock for tests:
+
+```swift
+let configuration = URLSessionConfiguration.ephemeral
+configuration.protocolClasses = [MockURLProtocol.self]
+
+let controller = NetworkingController<MyEndpoint, MyError>(
+    urlSession: URLSession(configuration: configuration)
+)
 ```
 
 ### Request Interception
