@@ -68,7 +68,7 @@ public final class NetworkingController<E: Endpoint, F: DecodableError>: Sendabl
         }
 
         do {
-            if try await interceptor?.authenticate() == false {
+            if try await authenticateIfNeeded() == false {
                 throw(F.authenticationError)
             }
         } catch {
@@ -143,7 +143,7 @@ public final class NetworkingController<E: Endpoint, F: DecodableError>: Sendabl
         }
         
         do {
-            if try await interceptor?.authenticate() == false {
+            if try await authenticateIfNeeded() == false {
                 throw(F.authenticationError)
             }
         } catch {

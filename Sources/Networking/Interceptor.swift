@@ -11,6 +11,19 @@ public protocol Interceptor: Sendable {
     /// - Returns: `true` if authentication is successful, `false` otherwise.
     func authenticate() async throws -> Bool
     
+    /// Refreshes the user's credentials after a request fails with `401 Unauthorized`.
+    ///
+    /// Return `true` to authenticate again and resend the request once, before any retries.
+    /// If another request already refreshed the credentials this request used, return `true` without refreshing again.
+    /// Requests made inside this method skip ``authenticate()`` and this method, so a 401 from your token endpoint
+    /// is thrown instead of refreshing again. Call your token endpoint from this method, not from `Task.detached`.
+    ///
+    /// - Parameters:
+    ///   - request: The request that failed, as it was sent.
+    ///   - error: The error returned for the 401 response.
+    /// - Returns: `true` to resend the request, `false` otherwise.
+    func refreshAuthentication(for request: URLRequest, after error: DecodableError) async -> Bool
+    
     /// Allows the interceptor to modify the `URLRequest` before it's sent.
     ///
     /// This method provides an opportunity to customize the request by adding headers, query parameters,
@@ -37,7 +50,7 @@ public protocol Interceptor: Sendable {
     /// It can be used to:
     /// - Log errors
     /// - Modify error information
-    /// - Trigger error-specific workflows (like authentication refresh on 401 errors)
+    /// - Trigger error-specific workflows
     ///
     /// - Parameter error: The error that occurred during the request.
     func intercept(_ error: DecodableError)
@@ -46,6 +59,7 @@ public protocol Interceptor: Sendable {
 public extension Interceptor {
     var authenticationState: AuthenticationState { .reachable }
     func authenticate() async throws -> Bool { true }
+    func refreshAuthentication(for request: URLRequest, after error: DecodableError) async -> Bool { false }
     func intercept(_ request: inout URLRequest) {}
     func intercept(_ data: inout Data) {}
     func intercept(_ error: DecodableError) {}

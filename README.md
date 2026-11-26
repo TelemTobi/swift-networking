@@ -13,6 +13,7 @@ A Swift package that makes network requests easier and more maintainable in your
 - 🔒 Powerful request & response interception
 - 🗺️ Flexible JSON mapping and response processing
 - 🔁 Retry handling with exponential backoff (opt-in per endpoint)
+- 🔑 Automatic resend after refreshing expired credentials on a 401
 - 🔧 Bring your own `URLSession` for custom configuration, delegates, or mocking
 - 📝 Comprehensive logging for debugging
 - 💪 Full async/await support
@@ -163,9 +164,16 @@ class MyInterceptor: Interceptor {
         return true
     }
     
+    func refreshAuthentication(for request: URLRequest, after error: DecodableError) async -> Bool {
+        let isTokenAlreadyRefreshed = request.value(forHTTPHeaderField: "Authorization") != "Bearer \(tokenStore.accessToken)"
+        if isTokenAlreadyRefreshed { return true }
+        
+        return await tokenStore.refresh()
+    }
+    
     func intercept(_ request: inout URLRequest) {
         // Add headers, tokens, etc.
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(tokenStore.accessToken)", forHTTPHeaderField: "Authorization")
     }
     
     func intercept(_ data: inout Data) {
@@ -175,7 +183,7 @@ class MyInterceptor: Interceptor {
     
     func intercept(_ error: DecodableError) {
         // Handle or process errors
-        // Example: refresh token on 401, log errors
+        // Example: log errors
     }
 }
 
@@ -183,6 +191,8 @@ let controller = NetworkingController<MyEndpoint, MyError>(
     interceptor: MyInterceptor()
 )
 ```
+
+When a request fails with `401 Unauthorized`, the controller calls `refreshAuthentication(for:after:)`. If it returns `true`, the controller calls `authenticate()` again and resends the request once, before any retry. Requests that fail at the same time each call `refreshAuthentication(for:after:)`, so skip the refresh when the request's token was already replaced, and share one in-flight refresh in `tokenStore.refresh()`. Requests made inside `refreshAuthentication(for:after:)` skip authentication, so a 401 from your token endpoint is thrown instead of refreshing again. The default implementation returns `false`, which keeps the existing behavior.
 
 ### JSON Mapping
 
