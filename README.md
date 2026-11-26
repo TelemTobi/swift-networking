@@ -164,9 +164,17 @@ class MyInterceptor: Interceptor {
         return true
     }
     
+    func hasRefreshedCredentials(usedBy request: URLRequest) -> Bool {
+        request.value(forHTTPHeaderField: "Authorization") != "Bearer \(tokenStore.accessToken)"
+    }
+    
+    func refreshAuthentication(after error: DecodableError) async -> Bool {
+        await tokenStore.refresh()
+    }
+    
     func intercept(_ request: inout URLRequest) {
         // Add headers, tokens, etc.
-        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer \(tokenStore.accessToken)", forHTTPHeaderField: "Authorization")
     }
     
     func intercept(_ data: inout Data) {
@@ -178,12 +186,6 @@ class MyInterceptor: Interceptor {
         // Handle or process errors
         // Example: log errors
     }
-    
-    func refreshAuthentication(after error: DecodableError) async -> Bool {
-        // Renew credentials the server refused with a 401
-        // Example: refresh an expired access token
-        return await tokenStore.refresh()
-    }
 }
 
 let controller = NetworkingController<MyEndpoint, MyError>(
@@ -191,7 +193,7 @@ let controller = NetworkingController<MyEndpoint, MyError>(
 )
 ```
 
-When a request fails with `401 Unauthorized`, the controller calls `refreshAuthentication(after:)` before any retry. Return `true` and it calls `authenticate()` again and resends the request once with the renewed credentials. The default implementation returns `false`, which keeps the existing behavior.
+When a request fails with `401 Unauthorized`, the controller resends it once, before any retry: right away if `hasRefreshedCredentials(usedBy:)` returns `true`, or after `refreshAuthentication(after:)` returns `true`. Requests that fail at the same time can each call `refreshAuthentication(after:)`, so `tokenStore.refresh()` should share one in-flight refresh. The default implementations keep the existing behavior.
 
 ### JSON Mapping
 

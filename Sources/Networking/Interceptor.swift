@@ -11,9 +11,17 @@ public protocol Interceptor: Sendable {
     /// - Returns: `true` if authentication is successful, `false` otherwise.
     func authenticate() async throws -> Bool
     
+    /// Checks whether the credentials used by a request that failed with `401 Unauthorized` were already refreshed.
+    ///
+    /// Return `true` to resend the request with the current credentials instead of refreshing them again.
+    ///
+    /// - Parameter request: The request that failed, as it was sent.
+    /// - Returns: `true` if the request's credentials are outdated, `false` otherwise.
+    func hasRefreshedCredentials(usedBy request: URLRequest) -> Bool
+    
     /// Refreshes the user's credentials after a request fails with `401 Unauthorized`.
     ///
-    /// Return `true` to authenticate again and resend the request once, before any retries.
+    /// Return `true` to resend the request once, before any retries.
     ///
     /// - Parameter error: The error returned for the 401 response.
     /// - Returns: `true` if the credentials were refreshed, `false` otherwise.
@@ -54,6 +62,7 @@ public protocol Interceptor: Sendable {
 public extension Interceptor {
     var authenticationState: AuthenticationState { .reachable }
     func authenticate() async throws -> Bool { true }
+    func hasRefreshedCredentials(usedBy request: URLRequest) -> Bool { false }
     func refreshAuthentication(after error: DecodableError) async -> Bool { false }
     func intercept(_ request: inout URLRequest) {}
     func intercept(_ data: inout Data) {}
