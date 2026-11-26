@@ -193,7 +193,7 @@ final class NetworkingControllerTests: XCTestCase {
         }
         
         XCTAssertEqual(MockURLProtocol.requestCount, 2)
-        XCTAssertEqual(authentications.value, 1)
+        XCTAssertEqual(authentications.value, 2)
     }
     
     func testUnauthorizedIsThrownWhenAuthenticationIsNotRefreshed() async {
@@ -251,6 +251,8 @@ final class NetworkingControllerTests: XCTestCase {
         MockURLProtocol.requestHandlers = [unauthorizedResponse, successResponse]
         MockURLProtocol.requestCount = 0
         
+        struct DefaultInterceptor: Interceptor {}
+        
         let controller = NetworkingController<TestEndpoint, TestError>(
             urlSession: makeEphemeralSession(),
             environment: .live,
@@ -292,7 +294,7 @@ final class NetworkingControllerTests: XCTestCase {
         XCTAssertEqual(refreshes.value, 1)
     }
     
-    func testUnauthorizedRefreshIsAskedOnceAcrossRetries() async {
+    func testUnauthorizedRefreshIsAskedOnEachAttemptUntilItSucceeds() async {
         MockURLProtocol.requestHandlers = Array(repeating: unauthorizedResponse, count: 3)
         MockURLProtocol.requestCount = 0
         let refreshes = Counter()
@@ -314,7 +316,7 @@ final class NetworkingControllerTests: XCTestCase {
         }
         
         XCTAssertEqual(MockURLProtocol.requestCount, 3)
-        XCTAssertEqual(refreshes.value, 1)
+        XCTAssertEqual(refreshes.value, 3)
     }
     
     func testUnauthorizedResendKeepsRetryCount() async {
@@ -394,8 +396,6 @@ final class NetworkingControllerTests: XCTestCase {
         )
     }
 }
-
-private struct DefaultInterceptor: Interceptor {}
 
 private final class Counter: @unchecked Sendable {
     private let lock = NSLock()

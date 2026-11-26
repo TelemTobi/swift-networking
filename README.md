@@ -192,7 +192,7 @@ let controller = NetworkingController<MyEndpoint, MyError>(
 )
 ```
 
-When a request fails with `401 Unauthorized`, the controller calls `refreshAuthentication(for:after:)` and resends the request once if it returns `true`, before any retry. Requests that fail at the same time each call it, so skip the refresh when the request's token was already replaced, and share one in-flight refresh in `tokenStore.refresh()`. The default implementation returns `false`, which keeps the existing behavior.
+When a request fails with `401 Unauthorized`, the controller calls `refreshAuthentication(for:after:)`. If it returns `true`, the controller calls `authenticate()` again and resends the request once, before any retry. Requests that fail at the same time each call `refreshAuthentication(for:after:)`, so skip the refresh when the request's token was already replaced, and share one in-flight refresh in `tokenStore.refresh()`. The default implementation returns `false`, which keeps the existing behavior.
 
 ### JSON Mapping
 

@@ -13,7 +13,7 @@ public protocol Interceptor: Sendable {
     
     /// Refreshes the user's credentials after a request fails with `401 Unauthorized`.
     ///
-    /// Return `true` to resend the request once, before any retries.
+    /// Return `true` to authenticate again and resend the request once, before any retries.
     /// If another request already refreshed the credentials this request used, return `true` without refreshing again.
     ///
     /// - Parameters:

@@ -33,14 +33,10 @@ extension NetworkingController {
             logError(endpoint, error.asNetworkingError, attempt)
             
             let error: F = error as? F ?? .unknownError(error.description)
-            var allowsAuthenticationRefresh = allowsAuthenticationRefresh
+            let canRefreshAuthentication = allowsAuthenticationRefresh && status == .unauthorized
             
-            if status == .unauthorized, allowsAuthenticationRefresh, let interceptor, let sentRequest {
-                allowsAuthenticationRefresh = false
-                
-                if await interceptor.refreshAuthentication(for: sentRequest, after: error) {
-                    return try await makeRequest(endpoint, attempt: attempt, allowsAuthenticationRefresh: false)
-                }
+            if canRefreshAuthentication, await reauthenticate(for: sentRequest, after: error) {
+                return try await makeRequest(endpoint, attempt: attempt, allowsAuthenticationRefresh: false)
             }
             
             if attempt < endpoint.retryCount {
@@ -52,6 +48,13 @@ extension NetworkingController {
             interceptor?.intercept(error)
             throw(error)
         }
+    }
+    
+    private func reauthenticate(for request: URLRequest?, after error: F) async -> Bool {
+        guard let interceptor, let request else { return false }
+        guard await interceptor.refreshAuthentication(for: request, after: error) else { return false }
+        
+        return (try? await interceptor.authenticate()) == true
     }
     
     internal func decodedError(_ endpoint: Endpoint, _ data: Data) -> F {
@@ -128,14 +131,10 @@ extension NetworkingController {
             logError(endpoint, error.asNetworkingError, attempt)
             
             let error: F = error as? F ?? .unknownError(error.description)
-            var allowsAuthenticationRefresh = allowsAuthenticationRefresh
+            let canRefreshAuthentication = allowsAuthenticationRefresh && status == .unauthorized
             
-            if status == .unauthorized, allowsAuthenticationRefresh, let interceptor, let sentRequest {
-                allowsAuthenticationRefresh = false
-                
-                if await interceptor.refreshAuthentication(for: sentRequest, after: error) {
-                    return try await makeRequest(endpoint, attempt: attempt, allowsAuthenticationRefresh: false)
-                }
+            if canRefreshAuthentication, await reauthenticate(for: sentRequest, after: error) {
+                return try await makeRequest(endpoint, attempt: attempt, allowsAuthenticationRefresh: false)
             }
             
             if attempt < endpoint.retryCount {
