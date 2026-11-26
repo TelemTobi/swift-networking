@@ -1,13 +1,16 @@
 import Foundation
 
 extension NetworkingController {
-    internal func makeRequest<T: Decodable & Sendable>(_ endpoint: Endpoint, attempt: Int = .zero) async throws(F) -> T {
+    internal func makeRequest<T: Decodable & Sendable>(_ endpoint: Endpoint, attempt: Int = .zero, hasRefreshedAuthentication: Bool = false) async throws(F) -> T {
+        var status = HttpStatus.undefined
+        
         do {
             var urlRequest = try URLRequest(endpoint)
             
             interceptor?.intercept(&urlRequest)
             
             var (data, response) = try await urlSession.data(for: urlRequest)
+            status = response.status
             
             logRequest(endpoint, urlRequest, response, data, attempt)
             
@@ -30,13 +33,24 @@ extension NetworkingController {
             if attempt < endpoint.retryCount {
                 let backoffDuration = 0.2 * pow(2, Double(attempt))
                 try? await Task.sleep(interval: backoffDuration)
-                return try await makeRequest(endpoint, attempt: attempt + 1)
+                return try await makeRequest(endpoint, attempt: attempt + 1, hasRefreshedAuthentication: hasRefreshedAuthentication)
             }
             
             let error: F = error as? F ?? .unknownError(error.description)
+            
+            if !hasRefreshedAuthentication, await canResendWithRenewedAuthentication(after: error, status: status) {
+                return try await makeRequest(endpoint, hasRefreshedAuthentication: true)
+            }
+            
             interceptor?.intercept(error)
             throw(error)
         }
+    }
+    
+    private func canResendWithRenewedAuthentication(after error: F, status: HttpStatus) async -> Bool {
+        guard status == .unauthorized, let interceptor else { return false }
+        guard await interceptor.refreshAuthentication(after: error) else { return false }
+        return (try? await interceptor.authenticate()) == true
     }
     
     internal func decodedError(_ endpoint: Endpoint, _ data: Data) -> F {
@@ -80,13 +94,16 @@ extension NetworkingController {
     }
     #endif
     
-    internal func makeRequest<T: Decodable & Sendable & JsonMapper>(_ endpoint: Endpoint, attempt: Int = .zero) async throws(F) -> T {
+    internal func makeRequest<T: Decodable & Sendable & JsonMapper>(_ endpoint: Endpoint, attempt: Int = .zero, hasRefreshedAuthentication: Bool = false) async throws(F) -> T {
+        var status = HttpStatus.undefined
+        
         do {
             var urlRequest = try URLRequest(endpoint)
             
             interceptor?.intercept(&urlRequest)
             
             var (data, response) = try await urlSession.data(for: urlRequest)
+            status = response.status
             
             logRequest(endpoint, urlRequest, response, data, attempt)
 
@@ -110,10 +127,15 @@ extension NetworkingController {
             if attempt < endpoint.retryCount {
                 let backoffDuration = 0.2 * pow(2, Double(attempt))
                 try? await Task.sleep(interval: backoffDuration)
-                return try await makeRequest(endpoint, attempt: attempt + 1)
+                return try await makeRequest(endpoint, attempt: attempt + 1, hasRefreshedAuthentication: hasRefreshedAuthentication)
             }
             
             let error: F = error as? F ?? .unknownError(error.description)
+            
+            if !hasRefreshedAuthentication, await canResendWithRenewedAuthentication(after: error, status: status) {
+                return try await makeRequest(endpoint, hasRefreshedAuthentication: true)
+            }
+            
             interceptor?.intercept(error)
             throw(error)
         }

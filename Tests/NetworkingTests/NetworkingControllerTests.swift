@@ -176,4 +176,116 @@ final class NetworkingControllerTests: XCTestCase {
         
         XCTAssertEqual(MockURLProtocol.requestCount, 3)
     }
+    
+    func testUnauthorizedIsRetriedOnceAfterRefreshingAuthentication() async {
+        MockURLProtocol.requestHandlers = [unauthorizedResponse, successResponse]
+        MockURLProtocol.requestCount = 0
+        let authentications = Counter()
+        
+        let result: Result<TestResponse, TestError> = await authenticatedController(
+            authentications: authentications,
+            refreshAuthentication: { true }
+        ).request(testEndpoint)
+        
+        guard case .success = result else {
+            XCTFail("Expected success after refreshing authentication, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 2)
+        XCTAssertEqual(authentications.value, 2)
+    }
+    
+    func testUnauthorizedIsThrownWhenAuthenticationIsNotRefreshed() async {
+        MockURLProtocol.requestHandlers = [unauthorizedResponse, successResponse]
+        MockURLProtocol.requestCount = 0
+        
+        let result: Result<TestResponse, TestError> = await authenticatedController(
+            authentications: Counter(),
+            refreshAuthentication: { false }
+        ).request(testEndpoint)
+        
+        guard case .failure = result else {
+            XCTFail("Expected the 401 to be thrown, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 1)
+    }
+    
+    func testUnauthorizedRetryHappensOnlyOnce() async {
+        MockURLProtocol.requestHandlers = [unauthorizedResponse, unauthorizedResponse, successResponse]
+        MockURLProtocol.requestCount = 0
+        
+        let result: Result<TestResponse, TestError> = await authenticatedController(
+            authentications: Counter(),
+            refreshAuthentication: { true }
+        ).request(testEndpoint)
+        
+        guard case .failure = result else {
+            XCTFail("Expected the second 401 to be thrown, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 2)
+    }
+    
+    func testOtherFailuresDoNotRefreshAuthentication() async {
+        MockURLProtocol.requestHandlers = [{ try self.response(status: 500) }, successResponse]
+        MockURLProtocol.requestCount = 0
+        
+        let result: Result<TestResponse, TestError> = await authenticatedController(
+            authentications: Counter(),
+            refreshAuthentication: { true }
+        ).request(testEndpoint)
+        
+        guard case .failure = result else {
+            XCTFail("Expected the 500 to be thrown, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 1)
+    }
+    
+    private var unauthorizedResponse: () throws -> (HTTPURLResponse, Data) {
+        { try self.response(status: 401) }
+    }
+    
+    private var successResponse: () throws -> (HTTPURLResponse, Data) {
+        { try self.response(status: 200, data: Self.sampleData(fileName: "SampleResponse")) }
+    }
+    
+    private func response(status: Int, data: Data = Data()) throws -> (HTTPURLResponse, Data) {
+        let url = try XCTUnwrap(URL(string: "https://someMadeUpUrl.co.il"))
+        let response = try XCTUnwrap(HTTPURLResponse(url: url, statusCode: status, httpVersion: nil, headerFields: nil))
+        return (response, data)
+    }
+    
+    private func authenticatedController(
+        authentications: Counter,
+        refreshAuthentication: @escaping @Sendable () -> Bool
+    ) -> NetworkingController<TestEndpoint, TestError> {
+        NetworkingController(
+            urlSession: makeEphemeralSession(),
+            environment: .live,
+            interceptor: TestInterceptor(
+                authenticationState: .reachable,
+                authenticate: {
+                    authentications.increment()
+                    return true
+                },
+                intercept: { _ in },
+                refreshAuthentication: refreshAuthentication
+            )
+        )
+    }
+}
+
+private final class Counter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+    
+    var value: Int { lock.withLock { count } }
+    
+    func increment() { lock.withLock { count += 1 } }
 }

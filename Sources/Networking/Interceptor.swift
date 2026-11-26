@@ -41,6 +41,17 @@ public protocol Interceptor: Sendable {
     ///
     /// - Parameter error: The error that occurred during the request.
     func intercept(_ error: DecodableError)
+
+    /// Renews the credentials after the server refused them with `401 Unauthorized`, for example by
+    /// force-refreshing an expired access token.
+    ///
+    /// Return `true` and the controller authenticates again with ``authenticate()`` and resends the request
+    /// with the renewed credentials. A resent request that fails again is thrown, so this is called at most
+    /// once per request and can't loop. Only the final error reaches ``intercept(_:)-(DecodableError)``.
+    ///
+    /// - Parameter error: The 401 error, for APIs that tell refusal reasons apart.
+    /// - Returns: `true` when the credentials were renewed. Defaults to `false`, which throws the 401 as is.
+    func refreshAuthentication(after error: DecodableError) async -> Bool
 }
 
 public extension Interceptor {
@@ -49,6 +60,7 @@ public extension Interceptor {
     func intercept(_ request: inout URLRequest) {}
     func intercept(_ data: inout Data) {}
     func intercept(_ error: DecodableError) {}
+    func refreshAuthentication(after error: DecodableError) async -> Bool { false }
 }
 
 /// An enum representing the possible authentication states of a user.
