@@ -184,7 +184,7 @@ final class NetworkingControllerTests: XCTestCase {
         
         let result: Result<TestResponse, TestError> = await authenticatedController(
             authentications: authentications,
-            refreshAuthentication: { true }
+            refreshAuthentication: { _ in true }
         ).request(testEndpoint)
         
         guard case .success = result else {
@@ -202,7 +202,7 @@ final class NetworkingControllerTests: XCTestCase {
         
         let result: Result<TestResponse, TestError> = await authenticatedController(
             authentications: Counter(),
-            refreshAuthentication: { false }
+            refreshAuthentication: { _ in false }
         ).request(testEndpoint)
         
         guard case .failure = result else {
@@ -219,7 +219,7 @@ final class NetworkingControllerTests: XCTestCase {
         
         let result: Result<TestResponse, TestError> = await authenticatedController(
             authentications: Counter(),
-            refreshAuthentication: { true }
+            refreshAuthentication: { _ in true }
         ).request(testEndpoint)
         
         guard case .failure = result else {
@@ -236,7 +236,7 @@ final class NetworkingControllerTests: XCTestCase {
         
         let result: Result<TestResponse, TestError> = await authenticatedController(
             authentications: Counter(),
-            refreshAuthentication: { true }
+            refreshAuthentication: { _ in true }
         ).request(testEndpoint)
         
         guard case .failure = result else {
@@ -277,7 +277,7 @@ final class NetworkingControllerTests: XCTestCase {
         
         let result: Result<TestResponse, TestError> = await authenticatedController(
             authentications: Counter(),
-            refreshAuthentication: {
+            refreshAuthentication: { _ in
                 refreshes.increment()
                 return true
             }
@@ -302,7 +302,7 @@ final class NetworkingControllerTests: XCTestCase {
         
         let result: Result<TestResponse, TestError> = await authenticatedController(
             authentications: Counter(),
-            refreshAuthentication: {
+            refreshAuthentication: { _ in
                 refreshes.increment()
                 return false
             }
@@ -327,7 +327,7 @@ final class NetworkingControllerTests: XCTestCase {
         
         let result: Result<TestResponse, TestError> = await authenticatedController(
             authentications: Counter(),
-            refreshAuthentication: {
+            refreshAuthentication: { _ in
                 refreshes.increment()
                 return true
             }
@@ -342,51 +342,22 @@ final class NetworkingControllerTests: XCTestCase {
         XCTAssertEqual(refreshes.value, 1)
     }
     
-    func testOutdatedCredentialsAreResentWithoutRefreshing() async {
+    func testRefreshAuthenticationReceivesTheFailedRequest() async {
         MockURLProtocol.requestHandlers = [unauthorizedResponse, successResponse]
         MockURLProtocol.requestCount = 0
-        let refreshes = Counter()
         
         let result: Result<TestResponse, TestError> = await authenticatedController(
             authentications: Counter(),
             intercept: { $0.setValue("Bearer outdated", forHTTPHeaderField: "Authorization") },
-            hasRefreshedCredentials: { $0.value(forHTTPHeaderField: "Authorization") == "Bearer outdated" },
-            refreshAuthentication: {
-                refreshes.increment()
-                return false
-            }
+            refreshAuthentication: { $0.value(forHTTPHeaderField: "Authorization") == "Bearer outdated" }
         ).request(testEndpoint)
         
         guard case .success = result else {
-            XCTFail("Expected success after resending with the current credentials, got \(result)")
+            XCTFail("Expected the failed request to reach refreshAuthentication, got \(result)")
             return
         }
         
         XCTAssertEqual(MockURLProtocol.requestCount, 2)
-        XCTAssertEqual(refreshes.value, 0)
-    }
-    
-    func testOutdatedCredentialsAreResentOnlyOnce() async {
-        MockURLProtocol.requestHandlers = [unauthorizedResponse, unauthorizedResponse, successResponse]
-        MockURLProtocol.requestCount = 0
-        let refreshes = Counter()
-        
-        let result: Result<TestResponse, TestError> = await authenticatedController(
-            authentications: Counter(),
-            hasRefreshedCredentials: { _ in true },
-            refreshAuthentication: {
-                refreshes.increment()
-                return true
-            }
-        ).request(testEndpoint)
-        
-        guard case .failure = result else {
-            XCTFail("Expected the second 401 to be thrown, got \(result)")
-            return
-        }
-        
-        XCTAssertEqual(MockURLProtocol.requestCount, 2)
-        XCTAssertEqual(refreshes.value, 0)
     }
     
     private var unauthorizedResponse: () throws -> (HTTPURLResponse, Data) {
@@ -406,8 +377,7 @@ final class NetworkingControllerTests: XCTestCase {
     private func authenticatedController(
         authentications: Counter,
         intercept: @escaping @Sendable (inout URLRequest) -> Void = { _ in },
-        hasRefreshedCredentials: @escaping @Sendable (URLRequest) -> Bool = { _ in false },
-        refreshAuthentication: @escaping @Sendable () -> Bool
+        refreshAuthentication: @escaping @Sendable (URLRequest) -> Bool
     ) -> NetworkingController<TestEndpoint, TestError> {
         NetworkingController(
             urlSession: makeEphemeralSession(),
@@ -419,7 +389,6 @@ final class NetworkingControllerTests: XCTestCase {
                     return true
                 },
                 intercept: intercept,
-                hasRefreshedCredentials: hasRefreshedCredentials,
                 refreshAuthentication: refreshAuthentication
             )
         )

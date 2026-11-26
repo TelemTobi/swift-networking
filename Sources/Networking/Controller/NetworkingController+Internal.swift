@@ -35,10 +35,10 @@ extension NetworkingController {
             let error: F = error as? F ?? .unknownError(error.description)
             var allowsAuthenticationRefresh = allowsAuthenticationRefresh
             
-            if status == .unauthorized, allowsAuthenticationRefresh, let sentRequest {
+            if status == .unauthorized, allowsAuthenticationRefresh, let interceptor, let sentRequest {
                 allowsAuthenticationRefresh = false
                 
-                if await refreshCredentialsIfNeeded(for: sentRequest, after: error) {
+                if await interceptor.refreshAuthentication(for: sentRequest, after: error) {
                     return try await makeRequest(endpoint, attempt: attempt, allowsAuthenticationRefresh: false)
                 }
             }
@@ -52,14 +52,6 @@ extension NetworkingController {
             interceptor?.intercept(error)
             throw(error)
         }
-    }
-    
-    private func refreshCredentialsIfNeeded(for request: URLRequest, after error: F) async -> Bool {
-        guard let interceptor else { return false }
-        
-        if interceptor.hasRefreshedCredentials(usedBy: request) { return true }
-        
-        return await interceptor.refreshAuthentication(after: error)
     }
     
     internal func decodedError(_ endpoint: Endpoint, _ data: Data) -> F {
@@ -138,10 +130,10 @@ extension NetworkingController {
             let error: F = error as? F ?? .unknownError(error.description)
             var allowsAuthenticationRefresh = allowsAuthenticationRefresh
             
-            if status == .unauthorized, allowsAuthenticationRefresh, let sentRequest {
+            if status == .unauthorized, allowsAuthenticationRefresh, let interceptor, let sentRequest {
                 allowsAuthenticationRefresh = false
                 
-                if await refreshCredentialsIfNeeded(for: sentRequest, after: error) {
+                if await interceptor.refreshAuthentication(for: sentRequest, after: error) {
                     return try await makeRequest(endpoint, attempt: attempt, allowsAuthenticationRefresh: false)
                 }
             }
