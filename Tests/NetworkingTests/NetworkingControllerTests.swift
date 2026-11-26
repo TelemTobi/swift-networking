@@ -376,7 +376,6 @@ final class NetworkingControllerTests: XCTestCase {
     }
 }
 
-/// Implements none of the optional requirements, so it uses every default from the `Interceptor` extension.
 private struct DefaultInterceptor: Interceptor {}
 
 private final class Counter: @unchecked Sendable {

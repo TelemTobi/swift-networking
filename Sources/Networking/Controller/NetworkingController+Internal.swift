@@ -52,8 +52,6 @@ extension NetworkingController {
         }
     }
     
-    /// Asks the interceptor to renew the refused credentials, then authenticates again.
-    /// Returns `true` when the request can be resent with the renewed credentials.
     private func renewAuthentication(after error: F) async -> Bool {
         guard let interceptor, await interceptor.refreshAuthentication(after: error) else { return false }
         return (try? await interceptor.authenticate()) == true
