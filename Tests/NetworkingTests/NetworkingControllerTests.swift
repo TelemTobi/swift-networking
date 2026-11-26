@@ -362,6 +362,54 @@ final class NetworkingControllerTests: XCTestCase {
         XCTAssertEqual(MockURLProtocol.requestCount, 2)
     }
     
+    func testRequestMadeWhileRefreshingIsNotRefreshedAgain() async {
+        MockURLProtocol.requestHandlers = [unauthorizedResponse, unauthorizedResponse, successResponse]
+        MockURLProtocol.requestCount = 0
+        
+        final class TokenEndpointInterceptor: Interceptor, @unchecked Sendable {
+            let tokenEndpoint: TestEndpoint
+            let authentications = Counter()
+            let refreshes = Counter()
+            var controller: NetworkingController<TestEndpoint, TestError>?
+            
+            init(tokenEndpoint: TestEndpoint) {
+                self.tokenEndpoint = tokenEndpoint
+            }
+            
+            func authenticate() async throws -> Bool {
+                authentications.increment()
+                return true
+            }
+            
+            func refreshAuthentication(for request: URLRequest, after error: DecodableError) async -> Bool {
+                refreshes.increment()
+                guard let controller else { return false }
+                
+                let result: Result<TestResponse, TestError> = await controller.request(tokenEndpoint)
+                return (try? result.get()) != nil
+            }
+        }
+        
+        let interceptor = TokenEndpointInterceptor(tokenEndpoint: testEndpoint)
+        let controller = NetworkingController<TestEndpoint, TestError>(
+            urlSession: makeEphemeralSession(),
+            environment: .live,
+            interceptor: interceptor
+        )
+        interceptor.controller = controller
+        
+        let result: Result<TestResponse, TestError> = await controller.request(testEndpoint)
+        
+        guard case .failure = result else {
+            XCTFail("Expected the 401 to be thrown, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 2)
+        XCTAssertEqual(interceptor.refreshes.value, 1)
+        XCTAssertEqual(interceptor.authentications.value, 1)
+    }
+    
     private var unauthorizedResponse: () throws -> (HTTPURLResponse, Data) {
         { try self.response(status: 401) }
     }

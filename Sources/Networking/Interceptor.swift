@@ -15,6 +15,8 @@ public protocol Interceptor: Sendable {
     ///
     /// Return `true` to authenticate again and resend the request once, before any retries.
     /// If another request already refreshed the credentials this request used, return `true` without refreshing again.
+    /// Requests made inside this method skip ``authenticate()`` and this method, so a 401 from your token endpoint
+    /// is thrown instead of refreshing again. Call your token endpoint from this method, not from `Task.detached`.
     ///
     /// - Parameters:
     ///   - request: The request that failed, as it was sent.

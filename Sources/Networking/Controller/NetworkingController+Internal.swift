@@ -33,9 +33,8 @@ extension NetworkingController {
             logError(endpoint, error.asNetworkingError, attempt)
             
             let error: F = error as? F ?? .unknownError(error.description)
-            let canRefreshAuthentication = allowsAuthenticationRefresh && status == .unauthorized
             
-            if canRefreshAuthentication, await reauthenticate(for: sentRequest, after: error) {
+            if allowsAuthenticationRefresh, await reauthenticate(sentRequest, status: status, after: error) {
                 return try await makeRequest(endpoint, attempt: attempt, allowsAuthenticationRefresh: false)
             }
             
@@ -50,11 +49,24 @@ extension NetworkingController {
         }
     }
     
-    private func reauthenticate(for request: URLRequest?, after error: F) async -> Bool {
-        guard let interceptor, let request else { return false }
-        guard await interceptor.refreshAuthentication(for: request, after: error) else { return false }
+    internal func authenticateIfNeeded() async throws -> Bool {
+        guard let interceptor, !AuthenticationRefresh.isInProgress else { return true }
         
-        return (try? await interceptor.authenticate()) == true
+        return try await interceptor.authenticate()
+    }
+    
+    private func reauthenticate(_ request: URLRequest?, status: HttpStatus, after error: F) async -> Bool {
+        guard status == .unauthorized,
+              let interceptor,
+              let request,
+              !AuthenticationRefresh.isInProgress
+        else { return false }
+        
+        return await AuthenticationRefresh.$isInProgress.withValue(true) {
+            guard await interceptor.refreshAuthentication(for: request, after: error) else { return false }
+            
+            return (try? await interceptor.authenticate()) == true
+        }
     }
     
     internal func decodedError(_ endpoint: Endpoint, _ data: Data) -> F {
@@ -131,9 +143,8 @@ extension NetworkingController {
             logError(endpoint, error.asNetworkingError, attempt)
             
             let error: F = error as? F ?? .unknownError(error.description)
-            let canRefreshAuthentication = allowsAuthenticationRefresh && status == .unauthorized
             
-            if canRefreshAuthentication, await reauthenticate(for: sentRequest, after: error) {
+            if allowsAuthenticationRefresh, await reauthenticate(sentRequest, status: status, after: error) {
                 return try await makeRequest(endpoint, attempt: attempt, allowsAuthenticationRefresh: false)
             }
             
@@ -180,4 +191,9 @@ extension NetworkingController {
         }
     }
     #endif
+}
+
+private enum AuthenticationRefresh {
+    /// Whether the interceptor is refreshing authentication in the current task or one of its parent tasks.
+    @TaskLocal static var isInProgress = false
 }

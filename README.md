@@ -173,7 +173,7 @@ class MyInterceptor: Interceptor {
     
     func intercept(_ request: inout URLRequest) {
         // Add headers, tokens, etc.
-        request.addValue("Bearer \(tokenStore.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(tokenStore.accessToken)", forHTTPHeaderField: "Authorization")
     }
     
     func intercept(_ data: inout Data) {
@@ -192,7 +192,7 @@ let controller = NetworkingController<MyEndpoint, MyError>(
 )
 ```
 
-When a request fails with `401 Unauthorized`, the controller calls `refreshAuthentication(for:after:)`. If it returns `true`, the controller calls `authenticate()` again and resends the request once, before any retry. Requests that fail at the same time each call `refreshAuthentication(for:after:)`, so skip the refresh when the request's token was already replaced, and share one in-flight refresh in `tokenStore.refresh()`. The default implementation returns `false`, which keeps the existing behavior.
+When a request fails with `401 Unauthorized`, the controller calls `refreshAuthentication(for:after:)`. If it returns `true`, the controller calls `authenticate()` again and resends the request once, before any retry. Requests that fail at the same time each call `refreshAuthentication(for:after:)`, so skip the refresh when the request's token was already replaced, and share one in-flight refresh in `tokenStore.refresh()`. Requests made inside `refreshAuthentication(for:after:)` skip authentication, so a 401 from your token endpoint is thrown instead of refreshing again. The default implementation returns `false`, which keeps the existing behavior.
 
 ### JSON Mapping
 
