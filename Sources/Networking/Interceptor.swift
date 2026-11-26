@@ -37,7 +37,9 @@ public protocol Interceptor: Sendable {
     /// It can be used to:
     /// - Log errors
     /// - Modify error information
-    /// - Trigger error-specific workflows (like authentication refresh on 401 errors)
+    /// - Trigger error-specific workflows
+    ///
+    /// To renew credentials and resend a request after a 401, implement ``refreshAuthentication(after:)`` instead.
     ///
     /// - Parameter error: The error that occurred during the request.
     func intercept(_ error: DecodableError)
@@ -45,12 +47,18 @@ public protocol Interceptor: Sendable {
     /// Renews the credentials after the server refused them with `401 Unauthorized`, for example by
     /// force-refreshing an expired access token.
     ///
-    /// Return `true` and the controller authenticates again with ``authenticate()`` and resends the request
-    /// with the renewed credentials. A resent request that fails again is thrown, so this is called at most
-    /// once per request and can't loop. Only the final error reaches ``intercept(_:)-(DecodableError)``.
+    /// Called on the first 401, before any retry from the endpoint's `retryCount`. Return `true` and the controller
+    /// authenticates again with ``authenticate()`` and resends the request with the renewed credentials. The resend
+    /// doesn't reset the retry count, so a request makes at most `retryCount + 2` attempts. This is called at most
+    /// once per request, whatever it returns, so it can't loop. Only the final error reaches
+    /// ``intercept(_:)-(DecodableError)``.
+    ///
+    /// Requests that fail at the same time each call this method. Renew the credentials once for all of them,
+    /// for example by having every caller await the same in-flight refresh task.
     ///
     /// - Parameter error: The 401 error, for APIs that tell refusal reasons apart.
-    /// - Returns: `true` when the credentials were renewed. Defaults to `false`, which throws the 401 as is.
+    /// - Returns: `true` when the credentials were renewed. Defaults to `false`, which keeps the existing behavior:
+    ///   the 401 is retried according to `retryCount`, then thrown.
     func refreshAuthentication(after error: DecodableError) async -> Bool
 }
 

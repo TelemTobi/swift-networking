@@ -247,6 +247,101 @@ final class NetworkingControllerTests: XCTestCase {
         XCTAssertEqual(MockURLProtocol.requestCount, 1)
     }
     
+    func testDefaultInterceptorDoesNotRefreshAuthentication() async {
+        MockURLProtocol.requestHandlers = [unauthorizedResponse, successResponse]
+        MockURLProtocol.requestCount = 0
+        
+        let controller = NetworkingController<TestEndpoint, TestError>(
+            urlSession: makeEphemeralSession(),
+            environment: .live,
+            interceptor: DefaultInterceptor()
+        )
+        
+        let result: Result<TestResponse, TestError> = await controller.request(testEndpoint)
+        
+        guard case .failure = result else {
+            XCTFail("Expected the 401 to be thrown, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 1)
+    }
+    
+    func testUnauthorizedRefreshesAuthenticationBeforeRetrying() async {
+        MockURLProtocol.requestHandlers = [unauthorizedResponse, successResponse]
+        MockURLProtocol.requestCount = 0
+        let refreshes = Counter()
+        
+        var endpoint = testEndpoint
+        endpoint.retryCount = 2
+        
+        let result: Result<TestResponse, TestError> = await authenticatedController(
+            authentications: Counter(),
+            refreshAuthentication: {
+                refreshes.increment()
+                return true
+            }
+        ).request(endpoint)
+        
+        guard case .success = result else {
+            XCTFail("Expected success after refreshing authentication, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 2)
+        XCTAssertEqual(refreshes.value, 1)
+    }
+    
+    func testUnauthorizedRefreshIsAskedOnceAcrossRetries() async {
+        MockURLProtocol.requestHandlers = Array(repeating: unauthorizedResponse, count: 3)
+        MockURLProtocol.requestCount = 0
+        let refreshes = Counter()
+        
+        var endpoint = testEndpoint
+        endpoint.retryCount = 2
+        
+        let result: Result<TestResponse, TestError> = await authenticatedController(
+            authentications: Counter(),
+            refreshAuthentication: {
+                refreshes.increment()
+                return false
+            }
+        ).request(endpoint)
+        
+        guard case .failure = result else {
+            XCTFail("Expected the 401 to be thrown after exhausting retries, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 3)
+        XCTAssertEqual(refreshes.value, 1)
+    }
+    
+    func testUnauthorizedResendKeepsRetryCount() async {
+        MockURLProtocol.requestHandlers = Array(repeating: unauthorizedResponse, count: 4)
+        MockURLProtocol.requestCount = 0
+        let refreshes = Counter()
+        
+        var endpoint = testEndpoint
+        endpoint.retryCount = 2
+        
+        let result: Result<TestResponse, TestError> = await authenticatedController(
+            authentications: Counter(),
+            refreshAuthentication: {
+                refreshes.increment()
+                return true
+            }
+        ).request(endpoint)
+        
+        guard case .failure = result else {
+            XCTFail("Expected the 401 to be thrown after exhausting retries, got \(result)")
+            return
+        }
+        
+        XCTAssertEqual(MockURLProtocol.requestCount, 4)
+        XCTAssertEqual(refreshes.value, 1)
+    }
+    
     private var unauthorizedResponse: () throws -> (HTTPURLResponse, Data) {
         { try self.response(status: 401) }
     }
@@ -280,6 +375,9 @@ final class NetworkingControllerTests: XCTestCase {
         )
     }
 }
+
+/// Implements none of the optional requirements, so it uses every default from the `Interceptor` extension.
+private struct DefaultInterceptor: Interceptor {}
 
 private final class Counter: @unchecked Sendable {
     private let lock = NSLock()

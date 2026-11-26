@@ -13,6 +13,7 @@ A Swift package that makes network requests easier and more maintainable in your
 - 🔒 Powerful request & response interception
 - 🗺️ Flexible JSON mapping and response processing
 - 🔁 Retry handling with exponential backoff (opt-in per endpoint)
+- 🔑 Automatic resend after refreshing expired credentials on a 401
 - 🔧 Bring your own `URLSession` for custom configuration, delegates, or mocking
 - 📝 Comprehensive logging for debugging
 - 💪 Full async/await support
@@ -175,7 +176,13 @@ class MyInterceptor: Interceptor {
     
     func intercept(_ error: DecodableError) {
         // Handle or process errors
-        // Example: refresh token on 401, log errors
+        // Example: log errors
+    }
+    
+    func refreshAuthentication(after error: DecodableError) async -> Bool {
+        // Renew credentials the server refused with a 401
+        // Example: refresh an expired access token
+        return await tokenStore.refresh()
     }
 }
 
@@ -183,6 +190,8 @@ let controller = NetworkingController<MyEndpoint, MyError>(
     interceptor: MyInterceptor()
 )
 ```
+
+When a request fails with `401 Unauthorized`, the controller calls `refreshAuthentication(after:)` before any retry. Return `true` and it calls `authenticate()` again and resends the request once with the renewed credentials. The default implementation returns `false`, which keeps the existing behavior.
 
 ### JSON Mapping
 
